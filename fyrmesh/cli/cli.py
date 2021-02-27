@@ -1,20 +1,20 @@
 import os
 import sys
 import json
+import time
 import click
 import http.client
 
-fyrmesh_server = http.client.HTTPConnection('localhost', 8888)
+FYRMESH_SERVER = http.client.HTTPConnection('localhost', 8888)
 
 def isConnected() -> bool:
     try:
-        fyrmesh_server.request('GET', '/', '{}')
-        response = json.loads(fyrmesh_server.getresponse().read())
-        connection = True
+        FYRMESH_SERVER.request('GET', '/', '{}')
+        response = json.loads(FYRMESH_SERVER.getresponse().read())
+        del response
+        return True
     except Exception:
-        connection = False
-
-    return connection
+        return False
 
 def checkConnection():
     if not isConnected():
@@ -33,18 +33,15 @@ def boot():
         sys.exit()
 
     directory = os.path.dirname(os.path.realpath(__file__))
-    serverscript = os.path.join(directory, 'server.py')
+    serverscript = os.path.join(directory, '..', 'server','server.py')
     os.system(f"start python {serverscript}")
-
-    message = "The FyrMesh server booted succefully" if isConnected() else "The FyrMesh server failed to boot"
-    click.echo(message)
 
 @cli.command()
 def activate():
     checkConnection()
 
-    fyrmesh_server.request('GET', '/activate', '{}')
-    response = json.loads(fyrmesh_server.getresponse().read())
+    FYRMESH_SERVER.request('GET', '/activate', '{}')
+    response = json.loads(FYRMESH_SERVER.getresponse().read())
 
     click.echo(f"{response['message']}")
 
@@ -52,8 +49,8 @@ def activate():
 def deactivate():
     checkConnection()
 
-    fyrmesh_server.request('GET', '/deactivate', '{}')
-    response = json.loads(fyrmesh_server.getresponse().read())
+    FYRMESH_SERVER.request('GET', '/deactivate', '{}')
+    response = json.loads(FYRMESH_SERVER.getresponse().read())
 
     click.echo(f"{response['message']}")
 
@@ -61,7 +58,7 @@ def deactivate():
 def status():
     checkConnection()
 
-    fyrmesh_server.request('GET', '/status', '{}')
-    response = json.loads(fyrmesh_server.getresponse().read())
+    FYRMESH_SERVER.request('GET', '/status', '{}')
+    response = json.loads(FYRMESH_SERVER.getresponse().read())
 
     click.echo(f"{response['message']}")
