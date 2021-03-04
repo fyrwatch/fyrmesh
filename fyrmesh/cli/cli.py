@@ -1,23 +1,21 @@
 import os
 import sys
 import json
-import time
+import rpyc
 import click
-import http.client
 
-FYRMESH_SERVER = http.client.HTTPConnection('localhost', 8888)
+mesh = None
+MESH_CONNECTED = False
 
-def isConnected() -> bool:
-    try:
-        FYRMESH_SERVER.request('GET', '/', '{}')
-        response = json.loads(FYRMESH_SERVER.getresponse().read())
-        del response
-        return True
-    except Exception:
-        return False
+try:
+    conn = rpyc.connect("localhost", 18000)
+    mesh = conn.root
+    MESH_CONNECTED = True
+except Exception:
+    MESH_CONNECTED = False
 
 def checkConnection():
-    if not isConnected():
+    if not MESH_CONNECTED:
         click.echo("The FyrMesh server is not running. Run 'fyrmesh boot' to start the server.")
         sys.exit()
 
@@ -28,7 +26,7 @@ def cli():
 
 @cli.command()
 def boot():
-    if isConnected():
+    if MESH_CONNECTED():
         click.echo("The FyrMesh server is already running.")
         sys.exit()
 
@@ -40,25 +38,19 @@ def boot():
 def activate():
     checkConnection()
 
-    FYRMESH_SERVER.request('GET', '/activate', '{}')
-    response = json.loads(FYRMESH_SERVER.getresponse().read())
-
-    click.echo(f"{response['message']}")
+    response = mesh.activate
+    click.echo(response)
 
 @cli.command()
 def deactivate():
     checkConnection()
 
-    FYRMESH_SERVER.request('GET', '/deactivate', '{}')
-    response = json.loads(FYRMESH_SERVER.getresponse().read())
-
-    click.echo(f"{response['message']}")
+    response = mesh.deactivate
+    click.echo(response)
 
 @cli.command()
 def status():
     checkConnection()
 
-    FYRMESH_SERVER.request('GET', '/status', '{}')
-    response = json.loads(FYRMESH_SERVER.getresponse().read())
-
-    click.echo(f"{response['message']}")
+    response = mesh.status
+    click.echo(response)

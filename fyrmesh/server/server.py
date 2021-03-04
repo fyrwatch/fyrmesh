@@ -1,65 +1,64 @@
-import json
-import time
+import rpyc
 import threading
-from bottle import run, route
 
-synclock = threading.Lock()
-meshstatus = False
 meshuptime = 0
+meshstatus = False
+meshlock = threading.Lock()
 
 def countuptime():
+    import time
     global meshstatus, meshuptime
 
     while 1:
-        with synclock:
+        with meshlock:
             meshuptime = meshuptime+1 if meshstatus else meshuptime
         time.sleep(1)
 
-@route('/')
-def home():
-    return json.dumps({
-        "message": "mesh homepage"
-    })
+class MeshService(rpyc.Service):
+    def on_connect(self, conn):
+        pass
 
-@route('/activate')
-def activatemesh():
-    global meshstatus
+    def on_disconnect(self, conn):
+        pass
 
-    with synclock:
-        meshstatus = True
+    @property
+    def exposed_activate(self):
+        global meshstatus
 
-    return json.dumps({
-        "message": "mesh activated"
-    })
+        with meshlock:
+            meshstatus = True
 
-@route('/deactivate')
-def deactivatemesh():
-    global meshstatus
+        print("mesh activated")
+        return "mesh activated"
 
-    with synclock:
-        meshstatus = False
-    
-    return json.dumps({
-        "message": "mesh deactivated"
-    })
+    @property
+    def exposed_deactivate(self):
+        global meshstatus
 
+        with meshlock:
+            meshstatus = False
 
-@route('/status')
-def meshstatusfunc():
-    global meshstatus, meshuptime
+        print("mesh deactivated")
+        return "mesh deactivated"
 
-    with synclock:
-        status = "ACTIVE" if meshstatus else "INACTIVE"
-        count = f"{meshuptime}s"
+    @property
+    def exposed_status(self):
+        import json
+        global meshstatus, meshuptime
 
-    return json.dumps({
-        "message": {
-            "meshstatus": status,
-            "meshuptime": count
-        }
-    })
+        with meshlock:
+            message = { 
+                "meshstatus": "ACTIVE" if meshstatus else "INACTIVE",
+                "meshuptime": f"{meshuptime}s"
+            }
+
+        return json.dumps(message)
+
 
 if __name__ == "__main__":
     counter = threading.Thread(target=countuptime, daemon=True)
     counter.start()
-    run(port=8888)
+
+    from rpyc.utils.server import ThreadedServer
+    server = ThreadedServer(MeshService, port=18000)
+    server.start()
