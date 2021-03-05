@@ -1,6 +1,5 @@
 import os
 import sys
-import json
 import rpyc
 import click
 
@@ -26,7 +25,7 @@ def cli():
 
 @cli.command()
 def boot():
-    if MESH_CONNECTED():
+    if MESH_CONNECTED:
         click.echo("The FyrMesh server is already running.")
         sys.exit()
 

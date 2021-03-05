@@ -60,5 +60,10 @@ if __name__ == "__main__":
     counter.start()
 
     from rpyc.utils.server import ThreadedServer
-    server = ThreadedServer(MeshService, port=18000)
+    print("The FyrMesh Server is starting...")
+    server = ThreadedServer(MeshService, port=18000, protocol_config={
+        'allow_public_attrs': True,
+        'allow_all_attrs': True
+    })
+    print(f"The FyrMesh Server has started on http://localhost/18000")
     server.start()
