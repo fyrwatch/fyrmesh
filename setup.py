@@ -14,17 +14,19 @@ from setuptools import setup
 
 setup(
     name="fyrmesh",
-    version="0.0.1",
+    version="0.1.0",
     description='Fyrmesh Orchestration Service and API',
     url='https://github.com/fyrwatch/fyrmesh',
-    packages=['fyrmesh', 'fyrmesh.cli', 'fyrmesh.server'],
+    packages=['fyrmesh'],
     package_data = {},
     test_suite = '',
     install_requires=[
-        'click'
+        'click',
+        'pyserial',
+        'rpyc'
     ],
     entry_points = {
-        'console_scripts': ['fyrmesh=fyrmesh.cli.cli:cli']
+        'console_scripts': ['fyrmesh=fyrmesh.cli:cli']
     },
     classifiers=[
         # Get strings from
