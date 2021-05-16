@@ -19,8 +19,9 @@ import (
 	"fmt"
 	"os"
 
-	orch "github.com/fyrwatch/fyrmesh/fyrorch/orchpkg"
 	"github.com/spf13/cobra"
+
+	tools "github.com/fyrwatch/fyrmesh/tools"
 )
 
 // configCmd represents the config command
@@ -63,7 +64,7 @@ The list of valid manipulation modes are below:
 
 func configfunc_generate() {
 	// Call the method to check if the config file exists.
-	check, _ := orch.CheckConfig()
+	check, _ := tools.CheckConfig()
 	if check {
 		// File already exists. Request user confirmation to overwrite.
 		fmt.Println("A config file already exists. Proceed to overwrite? y/n")
@@ -90,7 +91,7 @@ func configfunc_generate() {
 	}
 
 	// Call the method to generate a new default config file.
-	err := orch.GenerateConfig()
+	err := tools.GenerateConfig()
 	if err != nil {
 		// Config failed to be generated.
 		fmt.Printf("A config file could not be generated - %v\n", err)
@@ -105,7 +106,7 @@ func configfunc_generate() {
 
 func configfunc_checkfile() {
 	// Call the method to check if the config file exists.
-	check, err := orch.CheckConfig()
+	check, err := tools.CheckConfig()
 	if check {
 		// The file has been confirmed to exist
 		fmt.Println("A configuration file exists")
@@ -131,7 +132,7 @@ func configfunc_locate() {
 
 func configfunc_show() {
 	// Read the config file.
-	config, err := orch.ReadConfig()
+	config, err := tools.ReadConfig()
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(0)
@@ -166,7 +167,7 @@ func configfunc_show() {
 }
 
 func configfunc_modify() {
-	currentconfig, err := orch.ReadConfig()
+	currentconfig, err := tools.ReadConfig()
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(0)
@@ -223,8 +224,8 @@ func configfunc_modify() {
 			fmt.Scanln(&hosturl)
 
 			if hosturl != "0" {
-				newconfig.Services["ORCH"] = orch.ServiceConfig{Host: hosturl, Port: currentconfig.Services["ORCH"].Port}
-				orch.WriteConfig(newconfig)
+				newconfig.Services["ORCH"] = tools.ServiceConfig{Host: hosturl, Port: currentconfig.Services["ORCH"].Port}
+				tools.WriteConfig(newconfig)
 			}
 			os.Exit(0)
 
@@ -234,8 +235,8 @@ func configfunc_modify() {
 			fmt.Scanln(&hostport)
 
 			if hostport != 0 {
-				newconfig.Services["ORCH"] = orch.ServiceConfig{Host: currentconfig.Services["ORCH"].Host, Port: hostport}
-				orch.WriteConfig(newconfig)
+				newconfig.Services["ORCH"] = tools.ServiceConfig{Host: currentconfig.Services["ORCH"].Host, Port: hostport}
+				tools.WriteConfig(newconfig)
 			}
 			os.Exit(0)
 
@@ -259,8 +260,8 @@ func configfunc_modify() {
 			fmt.Scanln(&hosturl)
 
 			if hosturl != "0" {
-				newconfig.Services["LINK"] = orch.ServiceConfig{Host: hosturl, Port: currentconfig.Services["LINK"].Port}
-				orch.WriteConfig(newconfig)
+				newconfig.Services["LINK"] = tools.ServiceConfig{Host: hosturl, Port: currentconfig.Services["LINK"].Port}
+				tools.WriteConfig(newconfig)
 			}
 			os.Exit(0)
 
@@ -270,8 +271,8 @@ func configfunc_modify() {
 			fmt.Scanln(&hostport)
 
 			if hostport != 0 {
-				newconfig.Services["LINK"] = orch.ServiceConfig{Host: currentconfig.Services["LINK"].Host, Port: hostport}
-				orch.WriteConfig(newconfig)
+				newconfig.Services["LINK"] = tools.ServiceConfig{Host: currentconfig.Services["LINK"].Host, Port: hostport}
+				tools.WriteConfig(newconfig)
 			}
 			os.Exit(0)
 

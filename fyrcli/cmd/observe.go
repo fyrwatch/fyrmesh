@@ -20,10 +20,11 @@ import (
 	"io"
 	"os"
 
+	"github.com/spf13/cobra"
 	"google.golang.org/grpc/status"
 
-	orch "github.com/fyrwatch/fyrmesh/fyrorch/orchpkg"
-	"github.com/spf13/cobra"
+	orch "github.com/fyrwatch/fyrmesh/fyrorch/orch"
+	tools "github.com/fyrwatch/fyrmesh/tools"
 )
 
 // observeCmd represents the observe command
@@ -38,7 +39,7 @@ terminal that invokes it. Observer logs have the '[OBS]' suffix followed by the 
 
 	Run: func(cmd *cobra.Command, args []string) {
 		// Read the config file.
-		config, err := orch.ReadConfig()
+		config, err := tools.ReadConfig()
 		if err != nil {
 			fmt.Printf("Config file could not be read - %v\n", err)
 			fmt.Println("Run 'fyrcli config -m generate' if file does not exist or is corrupted.")

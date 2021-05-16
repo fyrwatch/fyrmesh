@@ -20,8 +20,9 @@ import (
 	"os"
 	"os/exec"
 
-	orch "github.com/fyrwatch/fyrmesh/fyrorch/orchpkg"
 	"github.com/spf13/cobra"
+
+	tools "github.com/fyrwatch/fyrmesh/tools"
 )
 
 // bootCmd represents the boot command
@@ -48,7 +49,7 @@ NOTE: The LINK server should be booted up before the ORCH server to avoid an err
 		srcdir := os.Getenv("FYRMESHSRC")
 
 		// Read the config file.
-		config, err := orch.ReadConfig()
+		config, err := tools.ReadConfig()
 		if err != nil {
 			fmt.Printf("Config file could not be read - %v\n", err)
 			fmt.Println("Run 'fyrcli config -m generate' if file does not exist or is corrupted.")

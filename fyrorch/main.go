@@ -3,7 +3,8 @@ package main
 import (
 	"fmt"
 
-	orch "github.com/fyrwatch/fyrmesh/fyrorch/orchpkg"
+	orch "github.com/fyrwatch/fyrmesh/fyrorch/orch"
+	tools "github.com/fyrwatch/fyrmesh/tools"
 )
 
 func main() {
@@ -20,13 +21,13 @@ func main() {
 	defer close(commandqueue)
 
 	//start a go-routine that handles log printing and forwarding.
-	go orch.LogHandler(logqueue, obsqueue)
+	go tools.LogHandler(logqueue, obsqueue)
 
 	// Initiate the connect runtime to the LINK server over gRPC
 	client, conn, err := orch.GRPCconnect_LINK()
 	defer conn.Close()
 	if err != nil {
-		logmessage := orch.GenerateORCHLog(fmt.Sprintf("connection to interface LINK failed - %v", err))
+		logmessage := tools.GenerateORCHLog(fmt.Sprintf("connection to interface LINK failed - %v", err))
 		logqueue <- logmessage
 	}
 
@@ -38,7 +39,7 @@ func main() {
 
 	// Start the Orchestrator ORCH gRPC Server
 	if err = orch.Start_ORCH_Server(*client, logqueue, commandqueue, obsqueue); err != nil {
-		logmessage := orch.GenerateORCHLog(fmt.Sprintf("serving orchestrator ORCH failed - %v", err))
+		logmessage := tools.GenerateORCHLog(fmt.Sprintf("serving orchestrator ORCH failed - %v", err))
 		logqueue <- logmessage
 	}
 }

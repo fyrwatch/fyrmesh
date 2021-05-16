@@ -18,8 +18,9 @@ package cmd
 import (
 	"fmt"
 
-	orch "github.com/fyrwatch/fyrmesh/fyrorch/orchpkg"
 	"github.com/spf13/cobra"
+
+	orch "github.com/fyrwatch/fyrmesh/fyrorch/orch"
 )
 
 // connectCmd represents the connect command
