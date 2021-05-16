@@ -3,8 +3,8 @@
 ## A Go package for sensor mesh orchestration powered by gRPC & Protocol Buffers with a built-in FyrCLI. 
 
 **Version: 0.2.0**  
-**Platform: Raspbian OS and Windows**  
-**Language: Go 1.16 and Python 3.8**
+**Platform: Raspbian OS & Windows**  
+**Language: Go 1.16 & Python 3.8**
 
 ### **Contributors**
 - **Manish Meganathan**
@@ -61,11 +61,15 @@ In gRPC, a client application can directly call a method on a server application
 
 gRPC clients and servers can run and talk to each other in a variety of environments - from servers inside Google to your own desktop - and can be written in any of gRPC’s supported languages. So, for example, you can easily create a gRPC server in Java with clients in Go, Python, or Ruby. In addition, the latest Google APIs will have gRPC versions of their interfaces, letting you easily build Google functionality into your applications.
 
+gRPC Source files:
+- [gRPC GitHub Repository](https://github.com/grpc/grpc)
+- [gRPC-Go GitHub Repository](https://github.com/grpc/grpc-go)
+
 For more information:
-- https://grpc.io/docs/what-is-grpc/introduction/
-- https://grpc.io/docs/what-is-grpc/core-concepts/
-- https://grpc.io/docs/what-is-grpc/introduction/#working-with-protocol-buffers
-- https://developers.google.com/protocol-buffers/docs/overview
+- [gRPC Introduction](https://grpc.io/docs/what-is-grpc/introduction/)
+- [gRPC Core Concepts](https://grpc.io/docs/what-is-grpc/core-concepts/)
+- [Protocol Buffers Overview](https://developers.google.com/protocol-buffers/docs/overview)
+- [Working with Protocol Buffers](https://grpc.io/docs/what-is-grpc/introduction/#working-with-protocol-buffers)
 
 ### **Installation**
 The FyrMesh library can be installed onto a Linux or a Windows system. Linux support is only intended for the Raspbian OS that is designed for the Raspberry Pi.  
@@ -172,4 +176,4 @@ fyrcli boot --server LINK
 fyrcli boot --server ORCH
 ```
 
-The LINK server must **always** be booted before the ``ORCH`` server to avoid gRPC errors.
+The ``LINK`` server must **always** be booted before the ``ORCH`` server to avoid gRPC errors.
