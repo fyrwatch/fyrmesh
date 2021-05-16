@@ -1,6 +1,6 @@
 # FyrMesh
 ![FyrMesh Banner](fyrmesh.png)
-## A Go package for sensor mesh orchestration powered by gRPC and Protocol Buffers with a built-in FyrCLI. 
+## A Go package for sensor mesh orchestration powered by gRPC & Protocol Buffers with a built-in FyrCLI. 
 
 **Version: 0.2.0**  
 **Platform: Raspbian OS and Windows**  
@@ -26,7 +26,6 @@
       - [*Windows*](#windows)
   - [**Using the FyrCLI**](#using-the-fyrcli)
   - [**Starting the FyrMesh**](#starting-the-fyrmesh)
-  - [**Related Material**](#related-material)
 
 ### **Overview**
 This package is a collection of microservices and a CLI tool that collectively form the FyrMesh platform. The communication between microservices is done with protocol buffers over gRPC.
@@ -50,6 +49,23 @@ A Go package that contains the implementation of the ``LINK`` gRPC client, the `
 A Go package that contains tools used by various **FyrMesh** services such interacting with the config file, handling logging I/O, interfacing with cloud services and manipulating internal data structures.
 
 #### gRPC and Protocol Buffers
+[**gRPC**](https://grpc.io/) is a modern open source high performance Remote Procedure Call (RPC) framework that can run in any environment. It can efficiently connect services in and across data centers with pluggable support for load balancing, tracing, health checking and authentication. It is also applicable in last mile of distributed computing to connect devices, mobile applications and browsers to backend services. While, gRPC as a protocol supports communication between services with JSON but it was designed to work well with the Protocol Buffers encoding format.
+
+[**Protocol Buffers**](https://developers.google.com/protocol-buffers) are Google's language-neutral, platform-neutral, extensible mechanism for serializing structured data – think XML, but smaller, faster, and simpler. You define how you want your data to be structured once, then you can use special generated source code to easily write and read your structured data to and from a variety of data streams and using a variety of languages.
+
+The protocol buffers for the FyrMesh are defined in a file ``fyrmesh/protos/fyrmesh.proto``.
+
+**How does it work?**  
+
+In gRPC, a client application can directly call a method on a server application on a different machine as if it were a local object, making it easier for you to create distributed applications and services. As in many RPC systems, gRPC is based around the idea of defining a service, specifying the methods that can be called remotely with their parameters and return types. On the server side, the server implements this interface and runs a gRPC server to handle client calls. On the client side, the client has a stub (referred to as just a client in some languages) that provides the same methods as the server.
+
+gRPC clients and servers can run and talk to each other in a variety of environments - from servers inside Google to your own desktop - and can be written in any of gRPC’s supported languages. So, for example, you can easily create a gRPC server in Java with clients in Go, Python, or Ruby. In addition, the latest Google APIs will have gRPC versions of their interfaces, letting you easily build Google functionality into your applications.
+
+For more information:
+- https://grpc.io/docs/what-is-grpc/introduction/
+- https://grpc.io/docs/what-is-grpc/core-concepts/
+- https://grpc.io/docs/what-is-grpc/introduction/#working-with-protocol-buffers
+- https://developers.google.com/protocol-buffers/docs/overview
 
 ### **Installation**
 The FyrMesh library can be installed onto a Linux or a Windows system. Linux support is only intended for the Raspbian OS that is designed for the Raspberry Pi.  
@@ -62,8 +78,8 @@ Install Go 1.16 and Python 3.8
    - [Install Python on Windows](https://realpython.com/installing-python/)
 
 
-Download this repository to some location on your system. This location will be used to configure ``FYRMESHSRC`` in the next steps.
-   - Download the latest release from the [releases](https://github.com/fyrwatch/fyrmesh/releases).
+Download this repository to some location on your system with one of the following methods. This location will be used to configure ``FYRMESHSRC`` in the next steps.
+   - Download the latest release from the [releases](https://github.com/fyrwatch/fyrmesh/releases) (v0.2 or above).
    - Use the Git bash to clone the repository.  
   ``` 
   git clone https://github.com/fyrwatch/fyrmesh.git 
@@ -74,7 +90,7 @@ Download this repository to some location on your system. This location will be 
   ```
 
 #### 2. Install FyrMesh
-- Navigate into the /fyrmesh directory of the repository after downloading it.
+- Navigate into the ``/fyrmesh`` directory of the repository after downloading it.
 - Open a terminal window in this directory and run the following command
 ```
 python3 install.py
@@ -100,22 +116,60 @@ The steps to add environment variables are detailed below for each platform.
   ``` 
   The recommended value for ``FYRMESHCONFIG`` is ``/home/pi/.fyrmesh/config.json``  
   The recommended value for go bin path extension is ``/home/pi/go/bin``
-- Reboot the system to effect changes.
+- Reboot the system to apply changes.
 
 ##### Windows
-- Press the Start Menu and type 'env'. 
-- An option 'Edit the environment variables for your account' will appear. Select it.
-- A list of environment variables will be visible. Select the 'New' option.
+- Press the Start Menu and type *'env*'. 
+- An option *'Edit the environment variables for your account'* will appear. Select it.
+- A list of environment variables will be visible. Select the *'New'* option.
 - Fill in the value for ``FYRMESHCONFIG``. The recommended value is ``C:\Users\<user>\.fyrmesh\config.json``.
 - Repeat and fill in the value for ``FYRMESHSRC`` with the path to the install directory.
-- PATH extension wouldn't be required because the Go installer for windows.
-- Reboot the systems to effect changes.
+- PATH extension wouldn't be required because the Go installer for windows handles it.
+- Reboot the systems to apply changes.
 
 The installation of FyrMesh is now complete.  
 Run the ``fyrcli`` command on the console to try it.
 
 ### Using the FyrCLI
+Run the command ``fyrcli help`` to view the usage of the FyrCLI Application.
+The output will be something along the lines of the following. 
+
+```
+A CLI Application to interact with the FyrMesh API. Powered by Cobra CLI, Golang and gRPC.
+
+Usage:
+  FyrCLI [command]
+
+Available Commands:
+  boot        Boots a FyrMesh gRPC server.
+  config      View/Manipulate configuration values of the FyrCLI.
+  connect     Set the connection state of the control node.
+  help        Help about any command
+  observe     Observes the logstream of the ORCH server.
+  ping        Pings the mesh for sensor readings.
+  status      Displays the current status of the mesh.
+
+Flags:
+      --config string   config file (default is $HOME/.cli.yaml)
+  -h, --help            help for FyrCLI
+
+Use "FyrCLI [command] --help" for more information about a command.
+```
+
+You can also run ``fyrcli help <command>`` or ``fyrcli <command> --help`` to recieve the
+usage instruction for any particular command.
 
 ### Starting the FyrMesh
+Starting the FyrMesh involves booting ``LINK`` and ``ORCH`` services. After which commands can be called and they will perform as expected. The FyrMesh service can however only be run a device that is configured as mesh-controller, which is usually a ARM based controller like the Raspberry Pi.
 
-### Related Material
+Running the FyrCLI on Windows machines configured as a mesh-observer is simply useful to send commands remotely and observing the behaviour of the mesh-controller.
+
+**How to boot the services?**
+
+To boot the ``ORCH`` and ``LINK`` services, run the following commands.
+```
+fyrcli boot --server LINK
+fyrcli boot --server ORCH
+```
+
+The LINK server must **always** be booted before the ``ORCH`` server to avoid gRPC errors.
