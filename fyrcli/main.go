@@ -15,8 +15,18 @@ limitations under the License.
 */
 package main
 
-import "github.com/fyrwatch/fyrmesh/fyrcli/cmd"
+import (
+	"fmt"
+
+	"github.com/fyrwatch/fyrmesh/fyrcli/cmd"
+)
 
 func main() {
+	// Change terminal color to orange
+	fmt.Println("\033[38;5;208m")
+
 	cmd.Execute()
+
+	// Change terminal color to original
+	fmt.Println("\033[0m")
 }
