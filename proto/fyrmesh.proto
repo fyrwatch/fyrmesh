@@ -1,0 +1,43 @@
+syntax = "proto3";
+
+option go_package = "/proto";
+
+package main;
+
+message Message {
+    string message = 1;
+    map<string, string> metadata = 2;
+}
+
+message Acknowledge {
+    bool success = 1;
+    string error = 2;
+}
+
+message MeshStatus {
+    string meshID = 1;
+    bool connected = 2;
+}
+
+message InterfaceLog {
+    string logsource = 1;
+    string logtime = 2;
+    string logmessage = 3;
+}
+
+message InterfaceCommand {
+    string command = 1;
+    map<string, string> metadata = 2;
+}
+
+service Interface {
+    rpc Read (Message) returns (stream InterfaceLog) {}
+    rpc Write (InterfaceCommand) returns (Acknowledge) {}
+}
+
+service Orchestrator {
+    rpc Status (Message) returns (MeshStatus) {}
+    rpc Connection (Message) returns (Acknowledge) {}
+    rpc Observe (Message) returns (stream Message) {}
+    rpc Ping (Message) returns (Acknowledge) {}
+}
