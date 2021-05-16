@@ -5,16 +5,18 @@ import (
 	"fmt"
 	"io"
 
-	pb "github.com/fyrwatch/fyrmesh/proto"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/status"
+
+	pb "github.com/fyrwatch/fyrmesh/proto"
+	tools "github.com/fyrwatch/fyrmesh/tools"
 )
 
 // A function that establishes a gRPC connection to the interface LINK server and returns the LINK
 // client object, the gPRC connection object and any error that occurs while attempting to connect.
 func GRPCconnect_LINK() (*pb.InterfaceClient, *grpc.ClientConn, error) {
 	// Read the service config for the LINK server
-	config, err := ReadConfig()
+	config, err := tools.ReadConfig()
 	if err != nil {
 		return nil, nil, fmt.Errorf("could not read config file - %v", err)
 	}
@@ -43,9 +45,9 @@ func Call_LINK_Write(client pb.InterfaceClient, logqueue chan string, command st
 	// Check for errors and construct appropriate logmessage
 	var logmessage string
 	if err != nil {
-		logmessage = GenerateORCHLog(fmt.Sprintf("LINK Write runtime failed - %v", err))
+		logmessage = tools.GenerateORCHLog(fmt.Sprintf("LINK Write runtime failed - %v", err))
 	} else {
-		logmessage = GenerateORCHLog(fmt.Sprintf("LINK Write runtime complete. command-'%v'. success-%v. ", command, acknowledge.GetSuccess()))
+		logmessage = tools.GenerateORCHLog(fmt.Sprintf("LINK Write runtime complete. command-'%v'. success-%v. ", command, acknowledge.GetSuccess()))
 	}
 
 	// Send logmessage onto the logqueue channel
@@ -60,7 +62,7 @@ func Call_LINK_Read(client pb.InterfaceClient, logqueue chan string) {
 	stream, err := client.Read(context.Background(), &pb.Message{Message: "start-stream-read"})
 	if err != nil {
 		// Check for an error and push the log into the channel
-		logmessage := GenerateORCHLog(fmt.Sprintf("LINK Read runtime failed - %v", err))
+		logmessage := tools.GenerateORCHLog(fmt.Sprintf("LINK Read runtime failed - %v", err))
 		logqueue <- logmessage
 	}
 
@@ -77,13 +79,13 @@ func Call_LINK_Read(client pb.InterfaceClient, logqueue chan string) {
 		// Push to logqueue if any other error occurs and break from loop.
 		if err != nil {
 			errstatus, _ := status.FromError(err)
-			logmessage := GenerateORCHLog(fmt.Sprintf("LINK Read runtime failed. Error while streaming - (%v)%v", errstatus.Code(), errstatus.Message()))
+			logmessage := tools.GenerateORCHLog(fmt.Sprintf("LINK Read runtime failed. Error while streaming - (%v)%v", errstatus.Code(), errstatus.Message()))
 			logqueue <- logmessage
 			break
 		}
 
 		// Push the InterfaceLog into the logqueue after parsing it.
-		logmessage := GenerateLINKLog(interfacelog.GetLogsource(), interfacelog.GetLogtime(), interfacelog.GetLogmessage())
+		logmessage := tools.GenerateLINKLog(interfacelog.GetLogsource(), interfacelog.GetLogtime(), interfacelog.GetLogmessage())
 		logqueue <- logmessage
 	}
 }

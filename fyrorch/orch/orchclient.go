@@ -4,15 +4,17 @@ import (
 	"context"
 	"fmt"
 
-	pb "github.com/fyrwatch/fyrmesh/proto"
 	"google.golang.org/grpc"
+
+	pb "github.com/fyrwatch/fyrmesh/proto"
+	tools "github.com/fyrwatch/fyrmesh/tools"
 )
 
 // A function that establishes a gRPC connection to the orchestrator ORCH server and returns the ORCH
 // client object, the gPRC connection object and any error that occurs while attempting to connect.
 func GRPCconnect_ORCH() (*pb.OrchestratorClient, *grpc.ClientConn, error) {
 	// Read the service config for the ORCH server
-	config, err := ReadConfig()
+	config, err := tools.ReadConfig()
 	if err != nil {
 		return nil, nil, fmt.Errorf("could not read config file - %v", err)
 	}

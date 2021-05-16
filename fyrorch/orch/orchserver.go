@@ -6,6 +6,7 @@ import (
 	"net"
 
 	pb "github.com/fyrwatch/fyrmesh/proto"
+	tools "github.com/fyrwatch/fyrmesh/tools"
 	"google.golang.org/grpc"
 )
 
@@ -125,7 +126,7 @@ func pushcommands(linkclient pb.InterfaceClient, logqueue chan string, commandqu
 // the server's command queue
 func Start_ORCH_Server(linkclient pb.InterfaceClient, logqueue chan string, commandqueue chan string, obsqueue chan string) error {
 	// Read the config file
-	config, err := ReadConfig()
+	config, err := tools.ReadConfig()
 	if err != nil {
 		return fmt.Errorf("could not read config file - %v", err)
 	}
