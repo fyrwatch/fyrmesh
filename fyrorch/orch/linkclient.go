@@ -51,7 +51,7 @@ func GRPCconnect_LINK() (*pb.InterfaceClient, *grpc.ClientConn, error) {
 // Requires the LINK client object, a logqueue channel and the string command to send.
 func Call_LINK_Write(client pb.InterfaceClient, logqueue chan string, command string) {
 	// Send a string command to the Interface LINK server and get the acknowledgment
-	acknowledge, err := client.Write(context.Background(), &pb.InterfaceCommand{Command: command})
+	acknowledge, err := client.Write(context.Background(), &pb.ControlCommand{Command: command})
 
 	// Check for errors and construct appropriate logmessage
 	var logmessage string
@@ -70,7 +70,7 @@ func Call_LINK_Write(client pb.InterfaceClient, logqueue chan string, command st
 // LINK server will continously parsed and passed into the logqueue channel to be handled.
 func Call_LINK_Read(client pb.InterfaceClient, logqueue chan string) {
 	// Call the 'Read' method of the LINK client with the appropriate trigger message
-	stream, err := client.Read(context.Background(), &pb.Message{Message: "start-stream-read"})
+	stream, err := client.Read(context.Background(), &pb.Trigger{Triggermessage: "start-stream-read"})
 	if err != nil {
 		// Check for an error and push the log into the channel
 		logmessage := tools.GenerateORCHLog(fmt.Sprintf("LINK Read runtime failed - %v", err))

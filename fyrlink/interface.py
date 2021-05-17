@@ -34,14 +34,15 @@ class Interface(fyrmesh_pb2_grpc.InterfaceServicer):
         server. Collects log messages from the read queue and streams them 
         to the gRPC Interface client. """
 
-        if request.message == "start-stream-read":
+        if request.triggermessage == "start-stream-read":
             with loglock:       
                 while True:
                     message = readfromqueue(readqueue)
 
                     if message:
-                        yield fyrmesh_pb2.InterfaceLog(
+                        yield fyrmesh_pb2.ComplexLog(
                             logsource=message['source'], 
+                            logtype=message['type'],
                             logtime=message['time'], 
                             logmessage=message['log'])
                     else:
@@ -49,8 +50,9 @@ class Interface(fyrmesh_pb2_grpc.InterfaceServicer):
         else:
             while True:
                 time.sleep(2)
-                yield fyrmesh_pb2.InterfaceLog(
+                yield fyrmesh_pb2.Complexlog(
                     logsource="LINK", 
+                    logtype="serverlog",
                     logtime=logtime(), 
                     logmessage="invalid read stream initiation code")
 

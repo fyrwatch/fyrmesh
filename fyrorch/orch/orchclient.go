@@ -49,16 +49,16 @@ func GRPCconnect_ORCH() (*pb.OrchestratorClient, *grpc.ClientConn, error) {
 // Requires the ORCH client object and a boolean value of the connection state to transmit.
 func Call_ORCH_Connection(client pb.OrchestratorClient, value bool) (bool, error) {
 	// Test the boolean value and set the appropriate commandmessage
-	var commandmessage string
+	var triggermessage string
 	if value {
-		commandmessage = "on"
+		triggermessage = "setconnection-on"
 	} else {
-		commandmessage = "off"
+		triggermessage = "setconnection-off"
 	}
 
 	// Send the commandmessage for the Connection method to the
 	// Orchestrator ORCH server and get the acknowledgment
-	acknowledge, err := client.Connection(context.Background(), &pb.Message{Message: commandmessage})
+	acknowledge, err := client.Connection(context.Background(), &pb.Trigger{Triggermessage: triggermessage})
 
 	// Check for errors and return the appropriate acknowledgement and error if any.
 	if err != nil {
@@ -72,7 +72,7 @@ func Call_ORCH_Connection(client pb.OrchestratorClient, value bool) (bool, error
 // Requires the ORCH client object and returns the stream client for the Observe service.
 func Call_ORCH_Observe(client pb.OrchestratorClient) (pb.Orchestrator_ObserveClient, error) {
 	// Send the valid initiation code as a Message to the Observe method of the ORCH Server
-	stream, err := client.Observe(context.Background(), &pb.Message{Message: "start-stream-observe"})
+	stream, err := client.Observe(context.Background(), &pb.Trigger{Triggermessage: "start-stream-observe"})
 	if err != nil {
 		return nil, fmt.Errorf("call to ORCH Observe runtime failed - %v", err)
 	}
@@ -85,7 +85,7 @@ func Call_ORCH_Observe(client pb.OrchestratorClient) (pb.Orchestrator_ObserveCli
 // Requires the ORCH client object and returns a MeshStatus object.
 func Call_ORCH_Status(client pb.OrchestratorClient) (*pb.MeshStatus, error) {
 	// Call the Status method with an arbitrary message
-	meshstatus, err := client.Status(context.Background(), &pb.Message{Message: "status-request"})
+	meshstatus, err := client.Status(context.Background(), &pb.Trigger{Triggermessage: "status-request"})
 	if err != nil {
 		return &pb.MeshStatus{}, fmt.Errorf("call to ORCH Status runtime failed - %v", err)
 	}
@@ -98,7 +98,7 @@ func Call_ORCH_Status(client pb.OrchestratorClient) (*pb.MeshStatus, error) {
 // Requires the ORCH client object and returns a boolean success acknowledgment.
 func Call_ORCH_Ping(client pb.OrchestratorClient) (bool, error) {
 	// Call the Ping method with the trigger code for mesh pinging
-	acknowledge, err := client.Ping(context.Background(), &pb.Message{Message: "send-ping-mesh"})
+	acknowledge, err := client.Ping(context.Background(), &pb.Trigger{Triggermessage: "send-ping-mesh"})
 
 	// Check for errors and return the appropriate acknowledgement and error if any.
 	if err != nil {
