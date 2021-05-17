@@ -16,12 +16,12 @@ class InterfaceStub(object):
         """
         self.Read = channel.unary_stream(
                 '/main.Interface/Read',
-                request_serializer=proto_dot_fyrmesh__pb2.Message.SerializeToString,
-                response_deserializer=proto_dot_fyrmesh__pb2.InterfaceLog.FromString,
+                request_serializer=proto_dot_fyrmesh__pb2.Trigger.SerializeToString,
+                response_deserializer=proto_dot_fyrmesh__pb2.ComplexLog.FromString,
                 )
         self.Write = channel.unary_unary(
                 '/main.Interface/Write',
-                request_serializer=proto_dot_fyrmesh__pb2.InterfaceCommand.SerializeToString,
+                request_serializer=proto_dot_fyrmesh__pb2.ControlCommand.SerializeToString,
                 response_deserializer=proto_dot_fyrmesh__pb2.Acknowledge.FromString,
                 )
 
@@ -46,12 +46,12 @@ def add_InterfaceServicer_to_server(servicer, server):
     rpc_method_handlers = {
             'Read': grpc.unary_stream_rpc_method_handler(
                     servicer.Read,
-                    request_deserializer=proto_dot_fyrmesh__pb2.Message.FromString,
-                    response_serializer=proto_dot_fyrmesh__pb2.InterfaceLog.SerializeToString,
+                    request_deserializer=proto_dot_fyrmesh__pb2.Trigger.FromString,
+                    response_serializer=proto_dot_fyrmesh__pb2.ComplexLog.SerializeToString,
             ),
             'Write': grpc.unary_unary_rpc_method_handler(
                     servicer.Write,
-                    request_deserializer=proto_dot_fyrmesh__pb2.InterfaceCommand.FromString,
+                    request_deserializer=proto_dot_fyrmesh__pb2.ControlCommand.FromString,
                     response_serializer=proto_dot_fyrmesh__pb2.Acknowledge.SerializeToString,
             ),
     }
@@ -76,8 +76,8 @@ class Interface(object):
             timeout=None,
             metadata=None):
         return grpc.experimental.unary_stream(request, target, '/main.Interface/Read',
-            proto_dot_fyrmesh__pb2.Message.SerializeToString,
-            proto_dot_fyrmesh__pb2.InterfaceLog.FromString,
+            proto_dot_fyrmesh__pb2.Trigger.SerializeToString,
+            proto_dot_fyrmesh__pb2.ComplexLog.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
@@ -93,7 +93,7 @@ class Interface(object):
             timeout=None,
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/main.Interface/Write',
-            proto_dot_fyrmesh__pb2.InterfaceCommand.SerializeToString,
+            proto_dot_fyrmesh__pb2.ControlCommand.SerializeToString,
             proto_dot_fyrmesh__pb2.Acknowledge.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
@@ -110,22 +110,22 @@ class OrchestratorStub(object):
         """
         self.Status = channel.unary_unary(
                 '/main.Orchestrator/Status',
-                request_serializer=proto_dot_fyrmesh__pb2.Message.SerializeToString,
+                request_serializer=proto_dot_fyrmesh__pb2.Trigger.SerializeToString,
                 response_deserializer=proto_dot_fyrmesh__pb2.MeshStatus.FromString,
                 )
         self.Connection = channel.unary_unary(
                 '/main.Orchestrator/Connection',
-                request_serializer=proto_dot_fyrmesh__pb2.Message.SerializeToString,
+                request_serializer=proto_dot_fyrmesh__pb2.Trigger.SerializeToString,
                 response_deserializer=proto_dot_fyrmesh__pb2.Acknowledge.FromString,
                 )
         self.Observe = channel.unary_stream(
                 '/main.Orchestrator/Observe',
-                request_serializer=proto_dot_fyrmesh__pb2.Message.SerializeToString,
-                response_deserializer=proto_dot_fyrmesh__pb2.Message.FromString,
+                request_serializer=proto_dot_fyrmesh__pb2.Trigger.SerializeToString,
+                response_deserializer=proto_dot_fyrmesh__pb2.SimpleLog.FromString,
                 )
         self.Ping = channel.unary_unary(
                 '/main.Orchestrator/Ping',
-                request_serializer=proto_dot_fyrmesh__pb2.Message.SerializeToString,
+                request_serializer=proto_dot_fyrmesh__pb2.Trigger.SerializeToString,
                 response_deserializer=proto_dot_fyrmesh__pb2.Acknowledge.FromString,
                 )
 
@@ -162,22 +162,22 @@ def add_OrchestratorServicer_to_server(servicer, server):
     rpc_method_handlers = {
             'Status': grpc.unary_unary_rpc_method_handler(
                     servicer.Status,
-                    request_deserializer=proto_dot_fyrmesh__pb2.Message.FromString,
+                    request_deserializer=proto_dot_fyrmesh__pb2.Trigger.FromString,
                     response_serializer=proto_dot_fyrmesh__pb2.MeshStatus.SerializeToString,
             ),
             'Connection': grpc.unary_unary_rpc_method_handler(
                     servicer.Connection,
-                    request_deserializer=proto_dot_fyrmesh__pb2.Message.FromString,
+                    request_deserializer=proto_dot_fyrmesh__pb2.Trigger.FromString,
                     response_serializer=proto_dot_fyrmesh__pb2.Acknowledge.SerializeToString,
             ),
             'Observe': grpc.unary_stream_rpc_method_handler(
                     servicer.Observe,
-                    request_deserializer=proto_dot_fyrmesh__pb2.Message.FromString,
-                    response_serializer=proto_dot_fyrmesh__pb2.Message.SerializeToString,
+                    request_deserializer=proto_dot_fyrmesh__pb2.Trigger.FromString,
+                    response_serializer=proto_dot_fyrmesh__pb2.SimpleLog.SerializeToString,
             ),
             'Ping': grpc.unary_unary_rpc_method_handler(
                     servicer.Ping,
-                    request_deserializer=proto_dot_fyrmesh__pb2.Message.FromString,
+                    request_deserializer=proto_dot_fyrmesh__pb2.Trigger.FromString,
                     response_serializer=proto_dot_fyrmesh__pb2.Acknowledge.SerializeToString,
             ),
     }
@@ -202,7 +202,7 @@ class Orchestrator(object):
             timeout=None,
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/main.Orchestrator/Status',
-            proto_dot_fyrmesh__pb2.Message.SerializeToString,
+            proto_dot_fyrmesh__pb2.Trigger.SerializeToString,
             proto_dot_fyrmesh__pb2.MeshStatus.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
@@ -219,7 +219,7 @@ class Orchestrator(object):
             timeout=None,
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/main.Orchestrator/Connection',
-            proto_dot_fyrmesh__pb2.Message.SerializeToString,
+            proto_dot_fyrmesh__pb2.Trigger.SerializeToString,
             proto_dot_fyrmesh__pb2.Acknowledge.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
@@ -236,8 +236,8 @@ class Orchestrator(object):
             timeout=None,
             metadata=None):
         return grpc.experimental.unary_stream(request, target, '/main.Orchestrator/Observe',
-            proto_dot_fyrmesh__pb2.Message.SerializeToString,
-            proto_dot_fyrmesh__pb2.Message.FromString,
+            proto_dot_fyrmesh__pb2.Trigger.SerializeToString,
+            proto_dot_fyrmesh__pb2.SimpleLog.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
@@ -253,7 +253,7 @@ class Orchestrator(object):
             timeout=None,
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/main.Orchestrator/Ping',
-            proto_dot_fyrmesh__pb2.Message.SerializeToString,
+            proto_dot_fyrmesh__pb2.Trigger.SerializeToString,
             proto_dot_fyrmesh__pb2.Acknowledge.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

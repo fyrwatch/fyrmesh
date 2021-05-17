@@ -18,8 +18,8 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type InterfaceClient interface {
-	Read(ctx context.Context, in *Message, opts ...grpc.CallOption) (Interface_ReadClient, error)
-	Write(ctx context.Context, in *InterfaceCommand, opts ...grpc.CallOption) (*Acknowledge, error)
+	Read(ctx context.Context, in *Trigger, opts ...grpc.CallOption) (Interface_ReadClient, error)
+	Write(ctx context.Context, in *ControlCommand, opts ...grpc.CallOption) (*Acknowledge, error)
 }
 
 type interfaceClient struct {
@@ -30,7 +30,7 @@ func NewInterfaceClient(cc grpc.ClientConnInterface) InterfaceClient {
 	return &interfaceClient{cc}
 }
 
-func (c *interfaceClient) Read(ctx context.Context, in *Message, opts ...grpc.CallOption) (Interface_ReadClient, error) {
+func (c *interfaceClient) Read(ctx context.Context, in *Trigger, opts ...grpc.CallOption) (Interface_ReadClient, error) {
 	stream, err := c.cc.NewStream(ctx, &Interface_ServiceDesc.Streams[0], "/main.Interface/Read", opts...)
 	if err != nil {
 		return nil, err
@@ -46,7 +46,7 @@ func (c *interfaceClient) Read(ctx context.Context, in *Message, opts ...grpc.Ca
 }
 
 type Interface_ReadClient interface {
-	Recv() (*InterfaceLog, error)
+	Recv() (*ComplexLog, error)
 	grpc.ClientStream
 }
 
@@ -54,15 +54,15 @@ type interfaceReadClient struct {
 	grpc.ClientStream
 }
 
-func (x *interfaceReadClient) Recv() (*InterfaceLog, error) {
-	m := new(InterfaceLog)
+func (x *interfaceReadClient) Recv() (*ComplexLog, error) {
+	m := new(ComplexLog)
 	if err := x.ClientStream.RecvMsg(m); err != nil {
 		return nil, err
 	}
 	return m, nil
 }
 
-func (c *interfaceClient) Write(ctx context.Context, in *InterfaceCommand, opts ...grpc.CallOption) (*Acknowledge, error) {
+func (c *interfaceClient) Write(ctx context.Context, in *ControlCommand, opts ...grpc.CallOption) (*Acknowledge, error) {
 	out := new(Acknowledge)
 	err := c.cc.Invoke(ctx, "/main.Interface/Write", in, out, opts...)
 	if err != nil {
@@ -75,8 +75,8 @@ func (c *interfaceClient) Write(ctx context.Context, in *InterfaceCommand, opts 
 // All implementations must embed UnimplementedInterfaceServer
 // for forward compatibility
 type InterfaceServer interface {
-	Read(*Message, Interface_ReadServer) error
-	Write(context.Context, *InterfaceCommand) (*Acknowledge, error)
+	Read(*Trigger, Interface_ReadServer) error
+	Write(context.Context, *ControlCommand) (*Acknowledge, error)
 	mustEmbedUnimplementedInterfaceServer()
 }
 
@@ -84,10 +84,10 @@ type InterfaceServer interface {
 type UnimplementedInterfaceServer struct {
 }
 
-func (UnimplementedInterfaceServer) Read(*Message, Interface_ReadServer) error {
+func (UnimplementedInterfaceServer) Read(*Trigger, Interface_ReadServer) error {
 	return status.Errorf(codes.Unimplemented, "method Read not implemented")
 }
-func (UnimplementedInterfaceServer) Write(context.Context, *InterfaceCommand) (*Acknowledge, error) {
+func (UnimplementedInterfaceServer) Write(context.Context, *ControlCommand) (*Acknowledge, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Write not implemented")
 }
 func (UnimplementedInterfaceServer) mustEmbedUnimplementedInterfaceServer() {}
@@ -104,7 +104,7 @@ func RegisterInterfaceServer(s grpc.ServiceRegistrar, srv InterfaceServer) {
 }
 
 func _Interface_Read_Handler(srv interface{}, stream grpc.ServerStream) error {
-	m := new(Message)
+	m := new(Trigger)
 	if err := stream.RecvMsg(m); err != nil {
 		return err
 	}
@@ -112,7 +112,7 @@ func _Interface_Read_Handler(srv interface{}, stream grpc.ServerStream) error {
 }
 
 type Interface_ReadServer interface {
-	Send(*InterfaceLog) error
+	Send(*ComplexLog) error
 	grpc.ServerStream
 }
 
@@ -120,12 +120,12 @@ type interfaceReadServer struct {
 	grpc.ServerStream
 }
 
-func (x *interfaceReadServer) Send(m *InterfaceLog) error {
+func (x *interfaceReadServer) Send(m *ComplexLog) error {
 	return x.ServerStream.SendMsg(m)
 }
 
 func _Interface_Write_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(InterfaceCommand)
+	in := new(ControlCommand)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -137,7 +137,7 @@ func _Interface_Write_Handler(srv interface{}, ctx context.Context, dec func(int
 		FullMethod: "/main.Interface/Write",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(InterfaceServer).Write(ctx, req.(*InterfaceCommand))
+		return srv.(InterfaceServer).Write(ctx, req.(*ControlCommand))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -168,10 +168,10 @@ var Interface_ServiceDesc = grpc.ServiceDesc{
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type OrchestratorClient interface {
-	Status(ctx context.Context, in *Message, opts ...grpc.CallOption) (*MeshStatus, error)
-	Connection(ctx context.Context, in *Message, opts ...grpc.CallOption) (*Acknowledge, error)
-	Observe(ctx context.Context, in *Message, opts ...grpc.CallOption) (Orchestrator_ObserveClient, error)
-	Ping(ctx context.Context, in *Message, opts ...grpc.CallOption) (*Acknowledge, error)
+	Status(ctx context.Context, in *Trigger, opts ...grpc.CallOption) (*MeshStatus, error)
+	Connection(ctx context.Context, in *Trigger, opts ...grpc.CallOption) (*Acknowledge, error)
+	Observe(ctx context.Context, in *Trigger, opts ...grpc.CallOption) (Orchestrator_ObserveClient, error)
+	Ping(ctx context.Context, in *Trigger, opts ...grpc.CallOption) (*Acknowledge, error)
 }
 
 type orchestratorClient struct {
@@ -182,7 +182,7 @@ func NewOrchestratorClient(cc grpc.ClientConnInterface) OrchestratorClient {
 	return &orchestratorClient{cc}
 }
 
-func (c *orchestratorClient) Status(ctx context.Context, in *Message, opts ...grpc.CallOption) (*MeshStatus, error) {
+func (c *orchestratorClient) Status(ctx context.Context, in *Trigger, opts ...grpc.CallOption) (*MeshStatus, error) {
 	out := new(MeshStatus)
 	err := c.cc.Invoke(ctx, "/main.Orchestrator/Status", in, out, opts...)
 	if err != nil {
@@ -191,7 +191,7 @@ func (c *orchestratorClient) Status(ctx context.Context, in *Message, opts ...gr
 	return out, nil
 }
 
-func (c *orchestratorClient) Connection(ctx context.Context, in *Message, opts ...grpc.CallOption) (*Acknowledge, error) {
+func (c *orchestratorClient) Connection(ctx context.Context, in *Trigger, opts ...grpc.CallOption) (*Acknowledge, error) {
 	out := new(Acknowledge)
 	err := c.cc.Invoke(ctx, "/main.Orchestrator/Connection", in, out, opts...)
 	if err != nil {
@@ -200,7 +200,7 @@ func (c *orchestratorClient) Connection(ctx context.Context, in *Message, opts .
 	return out, nil
 }
 
-func (c *orchestratorClient) Observe(ctx context.Context, in *Message, opts ...grpc.CallOption) (Orchestrator_ObserveClient, error) {
+func (c *orchestratorClient) Observe(ctx context.Context, in *Trigger, opts ...grpc.CallOption) (Orchestrator_ObserveClient, error) {
 	stream, err := c.cc.NewStream(ctx, &Orchestrator_ServiceDesc.Streams[0], "/main.Orchestrator/Observe", opts...)
 	if err != nil {
 		return nil, err
@@ -216,7 +216,7 @@ func (c *orchestratorClient) Observe(ctx context.Context, in *Message, opts ...g
 }
 
 type Orchestrator_ObserveClient interface {
-	Recv() (*Message, error)
+	Recv() (*SimpleLog, error)
 	grpc.ClientStream
 }
 
@@ -224,15 +224,15 @@ type orchestratorObserveClient struct {
 	grpc.ClientStream
 }
 
-func (x *orchestratorObserveClient) Recv() (*Message, error) {
-	m := new(Message)
+func (x *orchestratorObserveClient) Recv() (*SimpleLog, error) {
+	m := new(SimpleLog)
 	if err := x.ClientStream.RecvMsg(m); err != nil {
 		return nil, err
 	}
 	return m, nil
 }
 
-func (c *orchestratorClient) Ping(ctx context.Context, in *Message, opts ...grpc.CallOption) (*Acknowledge, error) {
+func (c *orchestratorClient) Ping(ctx context.Context, in *Trigger, opts ...grpc.CallOption) (*Acknowledge, error) {
 	out := new(Acknowledge)
 	err := c.cc.Invoke(ctx, "/main.Orchestrator/Ping", in, out, opts...)
 	if err != nil {
@@ -245,10 +245,10 @@ func (c *orchestratorClient) Ping(ctx context.Context, in *Message, opts ...grpc
 // All implementations must embed UnimplementedOrchestratorServer
 // for forward compatibility
 type OrchestratorServer interface {
-	Status(context.Context, *Message) (*MeshStatus, error)
-	Connection(context.Context, *Message) (*Acknowledge, error)
-	Observe(*Message, Orchestrator_ObserveServer) error
-	Ping(context.Context, *Message) (*Acknowledge, error)
+	Status(context.Context, *Trigger) (*MeshStatus, error)
+	Connection(context.Context, *Trigger) (*Acknowledge, error)
+	Observe(*Trigger, Orchestrator_ObserveServer) error
+	Ping(context.Context, *Trigger) (*Acknowledge, error)
 	mustEmbedUnimplementedOrchestratorServer()
 }
 
@@ -256,16 +256,16 @@ type OrchestratorServer interface {
 type UnimplementedOrchestratorServer struct {
 }
 
-func (UnimplementedOrchestratorServer) Status(context.Context, *Message) (*MeshStatus, error) {
+func (UnimplementedOrchestratorServer) Status(context.Context, *Trigger) (*MeshStatus, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Status not implemented")
 }
-func (UnimplementedOrchestratorServer) Connection(context.Context, *Message) (*Acknowledge, error) {
+func (UnimplementedOrchestratorServer) Connection(context.Context, *Trigger) (*Acknowledge, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Connection not implemented")
 }
-func (UnimplementedOrchestratorServer) Observe(*Message, Orchestrator_ObserveServer) error {
+func (UnimplementedOrchestratorServer) Observe(*Trigger, Orchestrator_ObserveServer) error {
 	return status.Errorf(codes.Unimplemented, "method Observe not implemented")
 }
-func (UnimplementedOrchestratorServer) Ping(context.Context, *Message) (*Acknowledge, error) {
+func (UnimplementedOrchestratorServer) Ping(context.Context, *Trigger) (*Acknowledge, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Ping not implemented")
 }
 func (UnimplementedOrchestratorServer) mustEmbedUnimplementedOrchestratorServer() {}
@@ -282,7 +282,7 @@ func RegisterOrchestratorServer(s grpc.ServiceRegistrar, srv OrchestratorServer)
 }
 
 func _Orchestrator_Status_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Message)
+	in := new(Trigger)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -294,13 +294,13 @@ func _Orchestrator_Status_Handler(srv interface{}, ctx context.Context, dec func
 		FullMethod: "/main.Orchestrator/Status",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(OrchestratorServer).Status(ctx, req.(*Message))
+		return srv.(OrchestratorServer).Status(ctx, req.(*Trigger))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _Orchestrator_Connection_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Message)
+	in := new(Trigger)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -312,13 +312,13 @@ func _Orchestrator_Connection_Handler(srv interface{}, ctx context.Context, dec 
 		FullMethod: "/main.Orchestrator/Connection",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(OrchestratorServer).Connection(ctx, req.(*Message))
+		return srv.(OrchestratorServer).Connection(ctx, req.(*Trigger))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _Orchestrator_Observe_Handler(srv interface{}, stream grpc.ServerStream) error {
-	m := new(Message)
+	m := new(Trigger)
 	if err := stream.RecvMsg(m); err != nil {
 		return err
 	}
@@ -326,7 +326,7 @@ func _Orchestrator_Observe_Handler(srv interface{}, stream grpc.ServerStream) er
 }
 
 type Orchestrator_ObserveServer interface {
-	Send(*Message) error
+	Send(*SimpleLog) error
 	grpc.ServerStream
 }
 
@@ -334,12 +334,12 @@ type orchestratorObserveServer struct {
 	grpc.ServerStream
 }
 
-func (x *orchestratorObserveServer) Send(m *Message) error {
+func (x *orchestratorObserveServer) Send(m *SimpleLog) error {
 	return x.ServerStream.SendMsg(m)
 }
 
 func _Orchestrator_Ping_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Message)
+	in := new(Trigger)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -351,7 +351,7 @@ func _Orchestrator_Ping_Handler(srv interface{}, ctx context.Context, dec func(i
 		FullMethod: "/main.Orchestrator/Ping",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(OrchestratorServer).Ping(ctx, req.(*Message))
+		return srv.(OrchestratorServer).Ping(ctx, req.(*Trigger))
 	}
 	return interceptor(ctx, in, info, handler)
 }

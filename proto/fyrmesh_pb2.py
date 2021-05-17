@@ -19,29 +19,29 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=b'Z\006/proto',
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\x13proto/fyrmesh.proto\x12\x04main\"z\n\x07Message\x12\x0f\n\x07message\x18\x01 \x01(\t\x12-\n\x08metadata\x18\x02 \x03(\x0b\x32\x1b.main.Message.MetadataEntry\x1a/\n\rMetadataEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"-\n\x0b\x41\x63knowledge\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\r\n\x05\x65rror\x18\x02 \x01(\t\"/\n\nMeshStatus\x12\x0e\n\x06meshID\x18\x01 \x01(\t\x12\x11\n\tconnected\x18\x02 \x01(\x08\"F\n\x0cInterfaceLog\x12\x11\n\tlogsource\x18\x01 \x01(\t\x12\x0f\n\x07logtime\x18\x02 \x01(\t\x12\x12\n\nlogmessage\x18\x03 \x01(\t\"\x8c\x01\n\x10InterfaceCommand\x12\x0f\n\x07\x63ommand\x18\x01 \x01(\t\x12\x36\n\x08metadata\x18\x02 \x03(\x0b\x32$.main.InterfaceCommand.MetadataEntry\x1a/\n\rMetadataEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x32p\n\tInterface\x12-\n\x04Read\x12\r.main.Message\x1a\x12.main.InterfaceLog\"\x00\x30\x01\x12\x34\n\x05Write\x12\x16.main.InterfaceCommand\x1a\x11.main.Acknowledge\"\x00\x32\xc6\x01\n\x0cOrchestrator\x12+\n\x06Status\x12\r.main.Message\x1a\x10.main.MeshStatus\"\x00\x12\x30\n\nConnection\x12\r.main.Message\x1a\x11.main.Acknowledge\"\x00\x12+\n\x07Observe\x12\r.main.Message\x1a\r.main.Message\"\x00\x30\x01\x12*\n\x04Ping\x12\r.main.Message\x1a\x11.main.Acknowledge\"\x00\x42\x08Z\x06/protob\x06proto3'
+  serialized_pb=b'\n\x13proto/fyrmesh.proto\x12\x04main\"\x81\x01\n\x07Trigger\x12\x16\n\x0etriggermessage\x18\x01 \x01(\t\x12-\n\x08metadata\x18\x02 \x03(\x0b\x32\x1b.main.Trigger.MetadataEntry\x1a/\n\rMetadataEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"-\n\x0b\x41\x63knowledge\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\r\n\x05\x65rror\x18\x02 \x01(\t\"/\n\nMeshStatus\x12\x0e\n\x06meshID\x18\x01 \x01(\t\x12\x11\n\tconnected\x18\x02 \x01(\x08\"\x1c\n\tSimpleLog\x12\x0f\n\x07message\x18\x01 \x01(\t\"U\n\nComplexLog\x12\x11\n\tlogsource\x18\x01 \x01(\t\x12\x0f\n\x07logtype\x18\x02 \x01(\t\x12\x0f\n\x07logtime\x18\x03 \x01(\t\x12\x12\n\nlogmessage\x18\x04 \x01(\t\"\x88\x01\n\x0e\x43ontrolCommand\x12\x0f\n\x07\x63ommand\x18\x01 \x01(\t\x12\x34\n\x08metadata\x18\x02 \x03(\x0b\x32\".main.ControlCommand.MetadataEntry\x1a/\n\rMetadataEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x32l\n\tInterface\x12+\n\x04Read\x12\r.main.Trigger\x1a\x10.main.ComplexLog\"\x00\x30\x01\x12\x32\n\x05Write\x12\x14.main.ControlCommand\x1a\x11.main.Acknowledge\"\x00\x32\xc8\x01\n\x0cOrchestrator\x12+\n\x06Status\x12\r.main.Trigger\x1a\x10.main.MeshStatus\"\x00\x12\x30\n\nConnection\x12\r.main.Trigger\x1a\x11.main.Acknowledge\"\x00\x12-\n\x07Observe\x12\r.main.Trigger\x1a\x0f.main.SimpleLog\"\x00\x30\x01\x12*\n\x04Ping\x12\r.main.Trigger\x1a\x11.main.Acknowledge\"\x00\x42\x08Z\x06/protob\x06proto3'
 )
 
 
 
 
-_MESSAGE_METADATAENTRY = _descriptor.Descriptor(
+_TRIGGER_METADATAENTRY = _descriptor.Descriptor(
   name='MetadataEntry',
-  full_name='main.Message.MetadataEntry',
+  full_name='main.Trigger.MetadataEntry',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='key', full_name='main.Message.MetadataEntry.key', index=0,
+      name='key', full_name='main.Trigger.MetadataEntry.key', index=0,
       number=1, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='value', full_name='main.Message.MetadataEntry.value', index=1,
+      name='value', full_name='main.Trigger.MetadataEntry.value', index=1,
       number=2, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
@@ -59,27 +59,27 @@ _MESSAGE_METADATAENTRY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=104,
-  serialized_end=151,
+  serialized_start=112,
+  serialized_end=159,
 )
 
-_MESSAGE = _descriptor.Descriptor(
-  name='Message',
-  full_name='main.Message',
+_TRIGGER = _descriptor.Descriptor(
+  name='Trigger',
+  full_name='main.Trigger',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='message', full_name='main.Message.message', index=0,
+      name='triggermessage', full_name='main.Trigger.triggermessage', index=0,
       number=1, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='metadata', full_name='main.Message.metadata', index=1,
+      name='metadata', full_name='main.Trigger.metadata', index=1,
       number=2, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
@@ -88,7 +88,7 @@ _MESSAGE = _descriptor.Descriptor(
   ],
   extensions=[
   ],
-  nested_types=[_MESSAGE_METADATAENTRY, ],
+  nested_types=[_TRIGGER_METADATAENTRY, ],
   enum_types=[
   ],
   serialized_options=None,
@@ -97,8 +97,8 @@ _MESSAGE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=29,
-  serialized_end=151,
+  serialized_start=30,
+  serialized_end=159,
 )
 
 
@@ -136,8 +136,8 @@ _ACKNOWLEDGE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=153,
-  serialized_end=198,
+  serialized_start=161,
+  serialized_end=206,
 )
 
 
@@ -175,36 +175,22 @@ _MESHSTATUS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=200,
-  serialized_end=247,
+  serialized_start=208,
+  serialized_end=255,
 )
 
 
-_INTERFACELOG = _descriptor.Descriptor(
-  name='InterfaceLog',
-  full_name='main.InterfaceLog',
+_SIMPLELOG = _descriptor.Descriptor(
+  name='SimpleLog',
+  full_name='main.SimpleLog',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='logsource', full_name='main.InterfaceLog.logsource', index=0,
+      name='message', full_name='main.SimpleLog.message', index=0,
       number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='logtime', full_name='main.InterfaceLog.logtime', index=1,
-      number=2, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='logmessage', full_name='main.InterfaceLog.logmessage', index=2,
-      number=3, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -221,28 +207,81 @@ _INTERFACELOG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=249,
-  serialized_end=319,
+  serialized_start=257,
+  serialized_end=285,
 )
 
 
-_INTERFACECOMMAND_METADATAENTRY = _descriptor.Descriptor(
-  name='MetadataEntry',
-  full_name='main.InterfaceCommand.MetadataEntry',
+_COMPLEXLOG = _descriptor.Descriptor(
+  name='ComplexLog',
+  full_name='main.ComplexLog',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='key', full_name='main.InterfaceCommand.MetadataEntry.key', index=0,
+      name='logsource', full_name='main.ComplexLog.logsource', index=0,
       number=1, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='value', full_name='main.InterfaceCommand.MetadataEntry.value', index=1,
+      name='logtype', full_name='main.ComplexLog.logtype', index=1,
+      number=2, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='logtime', full_name='main.ComplexLog.logtime', index=2,
+      number=3, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='logmessage', full_name='main.ComplexLog.logmessage', index=3,
+      number=4, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=287,
+  serialized_end=372,
+)
+
+
+_CONTROLCOMMAND_METADATAENTRY = _descriptor.Descriptor(
+  name='MetadataEntry',
+  full_name='main.ControlCommand.MetadataEntry',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='key', full_name='main.ControlCommand.MetadataEntry.key', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='value', full_name='main.ControlCommand.MetadataEntry.value', index=1,
       number=2, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
@@ -260,27 +299,27 @@ _INTERFACECOMMAND_METADATAENTRY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=104,
-  serialized_end=151,
+  serialized_start=112,
+  serialized_end=159,
 )
 
-_INTERFACECOMMAND = _descriptor.Descriptor(
-  name='InterfaceCommand',
-  full_name='main.InterfaceCommand',
+_CONTROLCOMMAND = _descriptor.Descriptor(
+  name='ControlCommand',
+  full_name='main.ControlCommand',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='command', full_name='main.InterfaceCommand.command', index=0,
+      name='command', full_name='main.ControlCommand.command', index=0,
       number=1, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='metadata', full_name='main.InterfaceCommand.metadata', index=1,
+      name='metadata', full_name='main.ControlCommand.metadata', index=1,
       number=2, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
@@ -289,7 +328,7 @@ _INTERFACECOMMAND = _descriptor.Descriptor(
   ],
   extensions=[
   ],
-  nested_types=[_INTERFACECOMMAND_METADATAENTRY, ],
+  nested_types=[_CONTROLCOMMAND_METADATAENTRY, ],
   enum_types=[
   ],
   serialized_options=None,
@@ -298,35 +337,36 @@ _INTERFACECOMMAND = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=322,
-  serialized_end=462,
+  serialized_start=375,
+  serialized_end=511,
 )
 
-_MESSAGE_METADATAENTRY.containing_type = _MESSAGE
-_MESSAGE.fields_by_name['metadata'].message_type = _MESSAGE_METADATAENTRY
-_INTERFACECOMMAND_METADATAENTRY.containing_type = _INTERFACECOMMAND
-_INTERFACECOMMAND.fields_by_name['metadata'].message_type = _INTERFACECOMMAND_METADATAENTRY
-DESCRIPTOR.message_types_by_name['Message'] = _MESSAGE
+_TRIGGER_METADATAENTRY.containing_type = _TRIGGER
+_TRIGGER.fields_by_name['metadata'].message_type = _TRIGGER_METADATAENTRY
+_CONTROLCOMMAND_METADATAENTRY.containing_type = _CONTROLCOMMAND
+_CONTROLCOMMAND.fields_by_name['metadata'].message_type = _CONTROLCOMMAND_METADATAENTRY
+DESCRIPTOR.message_types_by_name['Trigger'] = _TRIGGER
 DESCRIPTOR.message_types_by_name['Acknowledge'] = _ACKNOWLEDGE
 DESCRIPTOR.message_types_by_name['MeshStatus'] = _MESHSTATUS
-DESCRIPTOR.message_types_by_name['InterfaceLog'] = _INTERFACELOG
-DESCRIPTOR.message_types_by_name['InterfaceCommand'] = _INTERFACECOMMAND
+DESCRIPTOR.message_types_by_name['SimpleLog'] = _SIMPLELOG
+DESCRIPTOR.message_types_by_name['ComplexLog'] = _COMPLEXLOG
+DESCRIPTOR.message_types_by_name['ControlCommand'] = _CONTROLCOMMAND
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
-Message = _reflection.GeneratedProtocolMessageType('Message', (_message.Message,), {
+Trigger = _reflection.GeneratedProtocolMessageType('Trigger', (_message.Message,), {
 
   'MetadataEntry' : _reflection.GeneratedProtocolMessageType('MetadataEntry', (_message.Message,), {
-    'DESCRIPTOR' : _MESSAGE_METADATAENTRY,
+    'DESCRIPTOR' : _TRIGGER_METADATAENTRY,
     '__module__' : 'proto.fyrmesh_pb2'
-    # @@protoc_insertion_point(class_scope:main.Message.MetadataEntry)
+    # @@protoc_insertion_point(class_scope:main.Trigger.MetadataEntry)
     })
   ,
-  'DESCRIPTOR' : _MESSAGE,
+  'DESCRIPTOR' : _TRIGGER,
   '__module__' : 'proto.fyrmesh_pb2'
-  # @@protoc_insertion_point(class_scope:main.Message)
+  # @@protoc_insertion_point(class_scope:main.Trigger)
   })
-_sym_db.RegisterMessage(Message)
-_sym_db.RegisterMessage(Message.MetadataEntry)
+_sym_db.RegisterMessage(Trigger)
+_sym_db.RegisterMessage(Trigger.MetadataEntry)
 
 Acknowledge = _reflection.GeneratedProtocolMessageType('Acknowledge', (_message.Message,), {
   'DESCRIPTOR' : _ACKNOWLEDGE,
@@ -342,32 +382,39 @@ MeshStatus = _reflection.GeneratedProtocolMessageType('MeshStatus', (_message.Me
   })
 _sym_db.RegisterMessage(MeshStatus)
 
-InterfaceLog = _reflection.GeneratedProtocolMessageType('InterfaceLog', (_message.Message,), {
-  'DESCRIPTOR' : _INTERFACELOG,
+SimpleLog = _reflection.GeneratedProtocolMessageType('SimpleLog', (_message.Message,), {
+  'DESCRIPTOR' : _SIMPLELOG,
   '__module__' : 'proto.fyrmesh_pb2'
-  # @@protoc_insertion_point(class_scope:main.InterfaceLog)
+  # @@protoc_insertion_point(class_scope:main.SimpleLog)
   })
-_sym_db.RegisterMessage(InterfaceLog)
+_sym_db.RegisterMessage(SimpleLog)
 
-InterfaceCommand = _reflection.GeneratedProtocolMessageType('InterfaceCommand', (_message.Message,), {
+ComplexLog = _reflection.GeneratedProtocolMessageType('ComplexLog', (_message.Message,), {
+  'DESCRIPTOR' : _COMPLEXLOG,
+  '__module__' : 'proto.fyrmesh_pb2'
+  # @@protoc_insertion_point(class_scope:main.ComplexLog)
+  })
+_sym_db.RegisterMessage(ComplexLog)
+
+ControlCommand = _reflection.GeneratedProtocolMessageType('ControlCommand', (_message.Message,), {
 
   'MetadataEntry' : _reflection.GeneratedProtocolMessageType('MetadataEntry', (_message.Message,), {
-    'DESCRIPTOR' : _INTERFACECOMMAND_METADATAENTRY,
+    'DESCRIPTOR' : _CONTROLCOMMAND_METADATAENTRY,
     '__module__' : 'proto.fyrmesh_pb2'
-    # @@protoc_insertion_point(class_scope:main.InterfaceCommand.MetadataEntry)
+    # @@protoc_insertion_point(class_scope:main.ControlCommand.MetadataEntry)
     })
   ,
-  'DESCRIPTOR' : _INTERFACECOMMAND,
+  'DESCRIPTOR' : _CONTROLCOMMAND,
   '__module__' : 'proto.fyrmesh_pb2'
-  # @@protoc_insertion_point(class_scope:main.InterfaceCommand)
+  # @@protoc_insertion_point(class_scope:main.ControlCommand)
   })
-_sym_db.RegisterMessage(InterfaceCommand)
-_sym_db.RegisterMessage(InterfaceCommand.MetadataEntry)
+_sym_db.RegisterMessage(ControlCommand)
+_sym_db.RegisterMessage(ControlCommand.MetadataEntry)
 
 
 DESCRIPTOR._options = None
-_MESSAGE_METADATAENTRY._options = None
-_INTERFACECOMMAND_METADATAENTRY._options = None
+_TRIGGER_METADATAENTRY._options = None
+_CONTROLCOMMAND_METADATAENTRY._options = None
 
 _INTERFACE = _descriptor.ServiceDescriptor(
   name='Interface',
@@ -376,16 +423,16 @@ _INTERFACE = _descriptor.ServiceDescriptor(
   index=0,
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_start=464,
-  serialized_end=576,
+  serialized_start=513,
+  serialized_end=621,
   methods=[
   _descriptor.MethodDescriptor(
     name='Read',
     full_name='main.Interface.Read',
     index=0,
     containing_service=None,
-    input_type=_MESSAGE,
-    output_type=_INTERFACELOG,
+    input_type=_TRIGGER,
+    output_type=_COMPLEXLOG,
     serialized_options=None,
     create_key=_descriptor._internal_create_key,
   ),
@@ -394,7 +441,7 @@ _INTERFACE = _descriptor.ServiceDescriptor(
     full_name='main.Interface.Write',
     index=1,
     containing_service=None,
-    input_type=_INTERFACECOMMAND,
+    input_type=_CONTROLCOMMAND,
     output_type=_ACKNOWLEDGE,
     serialized_options=None,
     create_key=_descriptor._internal_create_key,
@@ -412,15 +459,15 @@ _ORCHESTRATOR = _descriptor.ServiceDescriptor(
   index=1,
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_start=579,
-  serialized_end=777,
+  serialized_start=624,
+  serialized_end=824,
   methods=[
   _descriptor.MethodDescriptor(
     name='Status',
     full_name='main.Orchestrator.Status',
     index=0,
     containing_service=None,
-    input_type=_MESSAGE,
+    input_type=_TRIGGER,
     output_type=_MESHSTATUS,
     serialized_options=None,
     create_key=_descriptor._internal_create_key,
@@ -430,7 +477,7 @@ _ORCHESTRATOR = _descriptor.ServiceDescriptor(
     full_name='main.Orchestrator.Connection',
     index=1,
     containing_service=None,
-    input_type=_MESSAGE,
+    input_type=_TRIGGER,
     output_type=_ACKNOWLEDGE,
     serialized_options=None,
     create_key=_descriptor._internal_create_key,
@@ -440,8 +487,8 @@ _ORCHESTRATOR = _descriptor.ServiceDescriptor(
     full_name='main.Orchestrator.Observe',
     index=2,
     containing_service=None,
-    input_type=_MESSAGE,
-    output_type=_MESSAGE,
+    input_type=_TRIGGER,
+    output_type=_SIMPLELOG,
     serialized_options=None,
     create_key=_descriptor._internal_create_key,
   ),
@@ -450,7 +497,7 @@ _ORCHESTRATOR = _descriptor.ServiceDescriptor(
     full_name='main.Orchestrator.Ping',
     index=3,
     containing_service=None,
-    input_type=_MESSAGE,
+    input_type=_TRIGGER,
     output_type=_ACKNOWLEDGE,
     serialized_options=None,
     create_key=_descriptor._internal_create_key,

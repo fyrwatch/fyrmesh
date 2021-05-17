@@ -4,8 +4,8 @@ option go_package = "/proto";
 
 package main;
 
-message Message {
-    string message = 1;
+message Trigger {
+    string triggermessage = 1;
     map<string, string> metadata = 2;
 }
 
@@ -19,25 +19,30 @@ message MeshStatus {
     bool connected = 2;
 }
 
-message InterfaceLog {
-    string logsource = 1;
-    string logtime = 2;
-    string logmessage = 3;
+message SimpleLog {
+    string message = 1;
 }
 
-message InterfaceCommand {
+message ComplexLog {
+    string logsource = 1;
+    string logtype = 2; 
+    string logtime = 3;
+    string logmessage = 4;
+}
+
+message ControlCommand {
     string command = 1;
     map<string, string> metadata = 2;
 }
 
 service Interface {
-    rpc Read (Message) returns (stream InterfaceLog) {}
-    rpc Write (InterfaceCommand) returns (Acknowledge) {}
+    rpc Read (Trigger) returns (stream ComplexLog) {}
+    rpc Write (ControlCommand) returns (Acknowledge) {}
 }
 
 service Orchestrator {
-    rpc Status (Message) returns (MeshStatus) {}
-    rpc Connection (Message) returns (Acknowledge) {}
-    rpc Observe (Message) returns (stream Message) {}
-    rpc Ping (Message) returns (Acknowledge) {}
+    rpc Status (Trigger) returns (MeshStatus) {}
+    rpc Connection (Trigger) returns (Acknowledge) {}
+    rpc Observe (Trigger) returns (stream SimpleLog) {}
+    rpc Ping (Trigger) returns (Acknowledge) {}
 }
