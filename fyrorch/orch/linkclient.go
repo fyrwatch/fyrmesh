@@ -49,9 +49,12 @@ func GRPCconnect_LINK() (*pb.InterfaceClient, *grpc.ClientConn, error) {
 
 // A function that calls the 'Write' method of the LINK server over a gRPC connection.
 // Requires the LINK client object, a logqueue channel and the string command to send.
-func Call_LINK_Write(client pb.InterfaceClient, logqueue chan string, command string) {
+func Call_LINK_Write(client pb.InterfaceClient, logqueue chan string, command map[string]string) {
+	commandmessage := command["command"]
+	delete(command, "command")
+
 	// Send a string command to the Interface LINK server and get the acknowledgment
-	acknowledge, err := client.Write(context.Background(), &pb.ControlCommand{Command: command})
+	acknowledge, err := client.Write(context.Background(), &pb.ControlCommand{Command: commandmessage, Metadata: command})
 
 	// Check for errors and construct appropriate logmessage
 	var logmessage string

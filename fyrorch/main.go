@@ -24,7 +24,7 @@ func main() {
 	// Create an observer channel that will be used to pass observation logs.
 	obsqueue := make(chan string)
 	// Create a command queue that will be passed into the Orchestrator to siphon commands to the LINK.
-	commandqueue := make(chan string)
+	commandqueue := make(chan map[string]string)
 
 	// Defer the closing of the created channels
 	defer close(logqueue)

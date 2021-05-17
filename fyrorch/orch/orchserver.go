@@ -26,7 +26,7 @@ type OrchestratorServer struct {
 	pb.UnimplementedOrchestratorServer
 	meshconnected  bool
 	meshidentifier string
-	commandqueue   chan string
+	commandqueue   chan map[string]string
 	observerqueue  chan string
 	logqueue       chan string
 }
@@ -43,13 +43,15 @@ func (server *OrchestratorServer) Connection(ctx context.Context, trigger *pb.Tr
 		// Set the meshconnected value to True
 		server.meshconnected = true
 		// Send a command to the server's command queue
-		server.commandqueue <- "connection-on"
+		command := map[string]string{"command": "connection-on"}
+		server.commandqueue <- command
 
 	case "setconnection-off":
 		// Set the meshconnected value to True
 		server.meshconnected = false
 		// Send a command to the server's command queue
-		server.commandqueue <- "connection-off"
+		command := map[string]string{"command": "connection-off"}
+		server.commandqueue <- command
 
 	default:
 		// Default to returning a fail Acknowledge because of an unsupported command message
@@ -108,7 +110,8 @@ func (server *OrchestratorServer) Ping(ctx context.Context, trigger *pb.Trigger)
 	switch triggermessage {
 	case "send-ping-mesh":
 		// Send a command to the server's command queue
-		server.commandqueue <- "readsensors-mesh"
+		command := map[string]string{"command": "readsensors-mesh"}
+		server.commandqueue <- command
 
 	case "send-ping-node":
 		// Returning a fail Acknowledge because of an unimplemented command message.
@@ -126,7 +129,7 @@ func (server *OrchestratorServer) Ping(ctx context.Context, trigger *pb.Trigger)
 // A function that handles the output of the commands recieved over a given command queue
 // by passing each recieved command to function that calls the the 'Write' method of the
 // interface LINK server. Iterates infinitely until the commandqueue is closed.
-func pushcommands(linkclient pb.InterfaceClient, logqueue chan string, commandqueue chan string) {
+func pushcommands(linkclient pb.InterfaceClient, logqueue chan string, commandqueue chan map[string]string) {
 	for command := range commandqueue {
 		Call_LINK_Write(linkclient, logqueue, command)
 	}
@@ -135,7 +138,7 @@ func pushcommands(linkclient pb.InterfaceClient, logqueue chan string, commandqu
 // A function that creates the gRPC server for the Orchestrator ORCH service
 // and sets it to listen on the appropriate port. Starts a go routine to check
 // the server's command queue
-func Start_ORCH_Server(linkclient pb.InterfaceClient, logqueue chan string, commandqueue chan string, obsqueue chan string) error {
+func Start_ORCH_Server(linkclient pb.InterfaceClient, logqueue chan string, commandqueue chan map[string]string, obsqueue chan string) error {
 	// Read the config file
 	config, err := tools.ReadConfig()
 	if err != nil {
