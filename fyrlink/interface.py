@@ -11,6 +11,8 @@ FyrMesh FyrLINK server
 """
 
 import os
+import sys
+import json
 import grpc
 import time
 import threading
@@ -19,9 +21,9 @@ import proto.fyrmesh_pb2 as fyrmesh_pb2
 import proto.fyrmesh_pb2_grpc as fyrmesh_pb2_grpc
 
 from fyrlink.parsers import logtime
-from fyrlink.workers import writequeue, readqueue, loglock
+from fyrlink.workers import commandqueue, logqueue, loglock
 from fyrlink.workers import reader, writer, logger, readfromqueue
-from fyrlink.threads import KillableThread
+from fyrlink.workers import KillableThread
 
 # Create lock synchronisation object
 threadlock = threading.Lock()
@@ -37,14 +39,17 @@ class Interface(fyrmesh_pb2_grpc.InterfaceServicer):
         if request.triggermessage == "start-stream-read":
             with loglock:       
                 while True:
-                    message = readfromqueue(readqueue)
+                    message = readfromqueue(logqueue)
 
                     if message:
                         yield fyrmesh_pb2.ComplexLog(
                             logsource=message['source'], 
                             logtype=message['type'],
                             logtime=message['time'], 
-                            logmessage=message['log'])
+                            logmessage=message['log'], 
+                            logmetadata=message['metadata']
+                        )
+
                     else:
                         pass
         else:
@@ -52,9 +57,13 @@ class Interface(fyrmesh_pb2_grpc.InterfaceServicer):
                 time.sleep(2)
                 yield fyrmesh_pb2.Complexlog(
                     logsource="LINK", 
-                    logtype="serverlog",
+                    logtype="protolog",
                     logtime=logtime(), 
-                    logmessage="invalid read stream initiation code")
+                    logmessage="invalid read stream initiation code", 
+                    logmetadata={
+                        "server": "LINK client",
+                        "service": "Read"
+                })
 
         
     def Write(self, request, context):
@@ -63,7 +72,28 @@ class Interface(fyrmesh_pb2_grpc.InterfaceServicer):
         appropriate structure. """
 
         command = request.command
-        writequeue.put({"type": "controlcommand", "command": command})
+
+        try:
+            commandqueue.put({"type": "controlcommand", "command": command})
+            logqueue.put({
+                "source": "LINK", "type": "protolog", "time": logtime(), 
+                "log": f"command '{command}' written to control node successfully",
+                "metadata": {
+                    "server": "LINK client", 
+                    "service": "Write"
+            }})
+
+        except Exception as e:
+            logqueue.put({
+                "source": "LINK", "type": "protolog", "time": logtime(), 
+                "log": f"command '{command}' failed to written to control node.",
+                "metadata": {
+                    "server": "LINK client",
+                    "service": "Write",
+                    "error": str(e)
+            }})
+            return fyrmesh_pb2.Acknowledge(success=False, error=str(e))
+
         return fyrmesh_pb2.Acknowledge(success=True, error="nil")
 
 
@@ -74,13 +104,35 @@ def grpc_serve():
     # Register the server as an Interface server
     fyrmesh_pb2_grpc.add_InterfaceServicer_to_server(Interface(), server)
 
-    # TODO: Extract port information from the config file.
+    # Retrieve the FYRMESHCONFIG env var
+    configpath = os.environ.get("FYRMESHCONFIG")
+    if not configpath:
+        logqueue.put({
+            "source": "LINK", 
+            "type": "serverlog", 
+            "time": logtime(), 
+            "log": "Could not read config. 'FYRMESHCONFIG' env variable is not set",
+            "metadata": {}
+        })
+        sys.exit()
+
+    # Read the config file
+    with open(configpath) as configfile:
+        configdata = json.load(configfile)
+
     # Setup the server listening port and start it.
-    server.add_insecure_port(f'[::]:50000')
+    port = configdata['services']['LINK']['port']
+    server.add_insecure_port(f'[::]:{port}')
     server.start()
 
     # Log the start of the server.
-    readqueue.put({"source": "LINK", "time": logtime(), "log": "Interface Link gRPC Server started on http://localhost:50000"})
+    logqueue.put({
+        "source": "LINK", 
+        "type": "serverlog", 
+        "time": logtime(), 
+        "log": "Interface Link gRPC Server started on http://localhost:50000",
+        "metadata": {}
+    })
 
     # Server will wait indefinitely for termination
     server.wait_for_termination()

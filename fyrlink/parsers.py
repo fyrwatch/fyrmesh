@@ -20,18 +20,37 @@ logtime = lambda: datetime.datetime.utcnow().isoformat()
 
 def dictparse(data):
     """ A function that attempts to parse the receieved data as a JSON dictonary"""
-    parsed = json.loads(data)
+    parseddata = json.loads(data)
 
-    if parsed['type'] == "meshlog":
-        return meshlogparse(parsed)  
+    if parseddata['type'] == "meshlog":
+        return meshlogparse(parseddata)  
     else: 
-        return {"source": "MESH", "time": logtime(), "log": f"(dict) {parsed}"}
+        return {
+            "source": "MESH", 
+            "type": "message", 
+            "time": logtime(), 
+            "log": f"{parseddata}", 
+            "metadata": {
+                "format": "dict", 
+                "type": parseddata['type']
+            }
+        }
 
 def strparse(data):
     """ A function that attempts to parse the receieved data as an ASCII string """
     try:
         parsed = data.decode('ascii')
-        return {"source": "MESH", "time": logtime(), "log": f"(str) {parsed.rstrip()}"} if parsed else None
+        return {
+            "source": "MESH", 
+            "type": "message", 
+            "time": logtime(), 
+            "log": f"{parsed.rstrip()}", 
+            "metadata": {
+                "format": "str", 
+                "type": "unknown"
+            }
+        } if parsed else None
+
     except:
         return None
 
@@ -43,25 +62,99 @@ def meshlogparse(meshlog: dict):
     logmessage = {"source": "MESH", "time": logtime()}
 
     if meshlogtype == "newconnection":
-        logmessage.update({"log": f"(newconnection) node={meshlogdata['newnode']}"})
+        logmessage.update({
+            "type": "newconnection", 
+            "log": "new node on mesh", 
+            "metadata": {
+                "node": meshlogdata['newnode']
+            }
+        })
     
     elif meshlogtype == "changedconnection":
-        logmessage.update({"log": f"(changedconnection)"})
+        logmessage.update({
+            "type": "changedconnection", 
+            "log": "mesh connections have changed", 
+            "metadata": {}
+        })
 
     elif meshlogtype == "nodetimeadjust":
-        logmessage.update({"log": f"(nodetimeadjust) offset={meshlogdata['offset']}"})
-
-    elif meshlogtype == "sensordata":
-        logmessage.update({"log": f"(sensordata) poll={meshlogdata['poll']} node={meshlogdata['node']} sensors={meshlogdata['sensors']}"})
+        logmessage.update({
+            "type": "nodetimeadjust", 
+            "log": "node time was adjusted to sync with the mesh", 
+            "metadata": {
+                "offset": meshlogdata['offset']
+            }
+        })
 
     elif meshlogtype == "handshake-rxack":
-        logmessage.update({"log": f"(handshake-rxack) node={meshlogdata['node']}"})
+        logmessage.update({
+            "type": "handshake", 
+            "log": "handshake completed with a node", 
+            "metadata": {
+                "node": meshlogdata['node']
+            }
+        })
+
+    elif meshlogtype == "sensordata":
+        logmessage.update({
+            "type": "sensordata", 
+            "log": "sensor data received", 
+            "metadata": {
+                "ping": meshlogdata['ping'],
+                "node": meshlogdata['node'],
+                "sensors": meshlogdata['sensors']
+            }
+        })
+
+    elif meshlogtype == "configdata":
+        logmessage.update({
+            "type": "configdata", 
+            "log": "config data received", 
+            "metadata": {
+                "ping": meshlogdata['ping'],
+                "node": meshlogdata['node'],
+                "config": meshlogdata['config']
+            }
+        })
+
+    elif meshlogtype == "controlconfigdata":
+        logmessage.update({
+            "type": "controlconfig",
+            "log": "control node config data received",
+            "metadata": {
+                "nodeID": meshlogdata["config"]["NODEID"],
+                "config": meshlogdata["config"]
+            }
+        })
+
+    elif meshlogtype == "controlnodelist":
+        logmessage.update({
+            "type": "nodelist",
+            "log": "mesh node list received",
+            "metadata": {
+                "nodelist": meshlogdata["nodelist"]
+            }
+        })
 
     elif meshlogtype == "messagerx":
-        logmessage.update({"log": f"(messagerx) type={meshlogdata['rxtype']} message={meshlogdata['message']}"})
+        logmessage.update({
+            "type": "message", 
+            "log": f"{meshlogdata['message']}", 
+            "metadata": {
+                "format": "str", 
+                "type": meshlogdata['rxtype']
+                }
+            })
 
     else:
-        logmessage.update({"log": f"(unknowntype) type={meshlogtype})"})
+        logmessage.update({
+            "type": "message", 
+            "log": f"{meshlogdata}",
+            "metadata": {
+                "format": "dict",
+                "type": meshlogtype
+                }
+            })
 
     return logmessage
 
