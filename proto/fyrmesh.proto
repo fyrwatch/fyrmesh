@@ -28,6 +28,7 @@ message ComplexLog {
     string logtype = 2; 
     string logtime = 3;
     string logmessage = 4;
+    map<string, string> logmetadata = 5;
 }
 
 message ControlCommand {
