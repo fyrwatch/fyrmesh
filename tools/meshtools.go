@@ -79,6 +79,32 @@ type SensorNode struct {
 	Connectpin int
 }
 
+// A method of SensorNode that returns the
+// sensor config of the node as a string.
+func (sensornode *SensorNode) GetConfigString() string {
+	// Declare a new slice of strings
+	var configstrings []string
+
+	if sensornode.DHTtype > 0 {
+		// If DHT is set, append it to config
+		configstrings = append(configstrings, "DHT")
+	}
+
+	if sensornode.FLMtype > 0 {
+		// If FLM is set, append it to config
+		configstrings = append(configstrings, "FLM")
+	}
+
+	if sensornode.GAStype > 0 {
+		// If GAS is set, append it to config
+		configstrings = append(configstrings, "GAS")
+	}
+
+	// Merge the configstrings into a single string and return it
+	config := strings.Join(configstrings, "-")
+	return config
+}
+
 // A constructor function that generates and returns a SensorNode.
 // Only accepts a Log of type 'configdata'.
 func NewSensorNode(log Log) (*SensorNode, error) {
@@ -284,8 +310,8 @@ func (meshorchestrator *MeshOrchestrator) SetNodeIDlist(log Log) error {
 	// Iterate over the string nodelist slice
 	for _, strnode := range strnodelist {
 		// Convert the string to an int and append it to the int nodelist
-		node, _ := strconv.Atoi(strnode)
-		nodelist = append(nodelist, int64(node))
+		node, _ := strconv.ParseInt(strnode, 0, 64)
+		nodelist = append(nodelist, node)
 	}
 
 	// Assign the new NodeIDlist
@@ -372,4 +398,15 @@ func (meshorchestrator *MeshOrchestrator) UpdateNodelist() {
 		command := map[string]string{"command": "readconfig-mesh"}
 		meshorchestrator.CommandQueue <- command
 	}
+}
+
+func (meshorchestrator *MeshOrchestrator) GetSimpleNodeList() map[int64]string {
+	simplenodelist := make(map[int64]string)
+	nodelist := meshorchestrator.Nodelist
+
+	for nodeid, node := range nodelist {
+		simplenodelist[nodeid] = node.GetConfigString()
+	}
+
+	return simplenodelist
 }

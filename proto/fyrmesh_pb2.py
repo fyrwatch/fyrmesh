@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=b'Z\006/proto',
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\x13proto/fyrmesh.proto\x12\x04main\"\x81\x01\n\x07Trigger\x12\x16\n\x0etriggermessage\x18\x01 \x01(\t\x12-\n\x08metadata\x18\x02 \x03(\x0b\x32\x1b.main.Trigger.MetadataEntry\x1a/\n\rMetadataEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"-\n\x0b\x41\x63knowledge\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\r\n\x05\x65rror\x18\x02 \x01(\t\"\xa8\x01\n\x0eMeshOrchStatus\x12\x11\n\tconnected\x18\x01 \x01(\x08\x12\x14\n\x0c\x63ontrollerID\x18\x02 \x01(\t\x12\x15\n\rcontrolnodeID\x18\x03 \x01(\x03\x12 \n\x08nodelist\x18\x04 \x01(\x0b\x32\x0e.main.NodeList\x12\x10\n\x08meshSSID\x18\x05 \x01(\t\x12\x10\n\x08meshPSWD\x18\x06 \x01(\t\x12\x10\n\x08meshPORT\x18\x07 \x01(\x05\"\x1c\n\tSimpleLog\x12\x0f\n\x07message\x18\x01 \x01(\t\"\xc1\x01\n\nComplexLog\x12\x11\n\tlogsource\x18\x01 \x01(\t\x12\x0f\n\x07logtype\x18\x02 \x01(\t\x12\x0f\n\x07logtime\x18\x03 \x01(\t\x12\x12\n\nlogmessage\x18\x04 \x01(\t\x12\x36\n\x0blogmetadata\x18\x05 \x03(\x0b\x32!.main.ComplexLog.LogmetadataEntry\x1a\x32\n\x10LogmetadataEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"\x88\x01\n\x0e\x43ontrolCommand\x12\x0f\n\x07\x63ommand\x18\x01 \x01(\t\x12\x34\n\x08metadata\x18\x02 \x03(\x0b\x32\".main.ControlCommand.MetadataEntry\x1a/\n\rMetadataEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"\x1b\n\x08NodeList\x12\x0f\n\x07nodeIDs\x18\x01 \x03(\x03\x32l\n\tInterface\x12+\n\x04Read\x12\r.main.Trigger\x1a\x10.main.ComplexLog\"\x00\x30\x01\x12\x32\n\x05Write\x12\x14.main.ControlCommand\x1a\x11.main.Acknowledge\"\x00\x32\xaf\x02\n\x0cOrchestrator\x12/\n\x06Status\x12\r.main.Trigger\x1a\x14.main.MeshOrchStatus\"\x00\x12\x30\n\nConnection\x12\r.main.Trigger\x1a\x11.main.Acknowledge\"\x00\x12-\n\x07Observe\x12\r.main.Trigger\x1a\x0f.main.SimpleLog\"\x00\x30\x01\x12*\n\x04Ping\x12\r.main.Trigger\x1a\x11.main.Acknowledge\"\x00\x12+\n\x08Nodelist\x12\r.main.Trigger\x1a\x0e.main.NodeList\"\x00\x12\x34\n\x07\x43ommand\x12\x14.main.ControlCommand\x1a\x11.main.Acknowledge\"\x00\x42\x08Z\x06/protob\x06proto3'
+  serialized_pb=b'\n\x13proto/fyrmesh.proto\x12\x04main\"\x81\x01\n\x07Trigger\x12\x16\n\x0etriggermessage\x18\x01 \x01(\t\x12-\n\x08metadata\x18\x02 \x03(\x0b\x32\x1b.main.Trigger.MetadataEntry\x1a/\n\rMetadataEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"-\n\x0b\x41\x63knowledge\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\r\n\x05\x65rror\x18\x02 \x01(\t\"\xa8\x01\n\x0eMeshOrchStatus\x12\x11\n\tconnected\x18\x01 \x01(\x08\x12\x14\n\x0c\x63ontrollerID\x18\x02 \x01(\t\x12\x15\n\rcontrolnodeID\x18\x03 \x01(\x03\x12 \n\x08nodelist\x18\x04 \x01(\x0b\x32\x0e.main.NodeList\x12\x10\n\x08meshSSID\x18\x05 \x01(\t\x12\x10\n\x08meshPSWD\x18\x06 \x01(\t\x12\x10\n\x08meshPORT\x18\x07 \x01(\x05\"\x1c\n\tSimpleLog\x12\x0f\n\x07message\x18\x01 \x01(\t\"\xc1\x01\n\nComplexLog\x12\x11\n\tlogsource\x18\x01 \x01(\t\x12\x0f\n\x07logtype\x18\x02 \x01(\t\x12\x0f\n\x07logtime\x18\x03 \x01(\t\x12\x12\n\nlogmessage\x18\x04 \x01(\t\x12\x36\n\x0blogmetadata\x18\x05 \x03(\x0b\x32!.main.ComplexLog.LogmetadataEntry\x1a\x32\n\x10LogmetadataEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"\x88\x01\n\x0e\x43ontrolCommand\x12\x0f\n\x07\x63ommand\x18\x01 \x01(\t\x12\x34\n\x08metadata\x18\x02 \x03(\x0b\x32\".main.ControlCommand.MetadataEntry\x1a/\n\rMetadataEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"b\n\x08NodeList\x12(\n\x05nodes\x18\x01 \x03(\x0b\x32\x19.main.NodeList.NodesEntry\x1a,\n\nNodesEntry\x12\x0b\n\x03key\x18\x01 \x01(\x03\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x32l\n\tInterface\x12+\n\x04Read\x12\r.main.Trigger\x1a\x10.main.ComplexLog\"\x00\x30\x01\x12\x32\n\x05Write\x12\x14.main.ControlCommand\x1a\x11.main.Acknowledge\"\x00\x32\xaf\x02\n\x0cOrchestrator\x12/\n\x06Status\x12\r.main.Trigger\x1a\x14.main.MeshOrchStatus\"\x00\x12\x30\n\nConnection\x12\r.main.Trigger\x1a\x11.main.Acknowledge\"\x00\x12-\n\x07Observe\x12\r.main.Trigger\x1a\x0f.main.SimpleLog\"\x00\x30\x01\x12*\n\x04Ping\x12\r.main.Trigger\x1a\x11.main.Acknowledge\"\x00\x12+\n\x08Nodelist\x12\r.main.Trigger\x1a\x0e.main.NodeList\"\x00\x12\x34\n\x07\x43ommand\x12\x14.main.ControlCommand\x1a\x11.main.Acknowledge\"\x00\x42\x08Z\x06/protob\x06proto3'
 )
 
 
@@ -422,18 +422,25 @@ _CONTROLCOMMAND = _descriptor.Descriptor(
 )
 
 
-_NODELIST = _descriptor.Descriptor(
-  name='NodeList',
-  full_name='main.NodeList',
+_NODELIST_NODESENTRY = _descriptor.Descriptor(
+  name='NodesEntry',
+  full_name='main.NodeList.NodesEntry',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='nodeIDs', full_name='main.NodeList.nodeIDs', index=0,
-      number=1, type=3, cpp_type=2, label=3,
-      has_default_value=False, default_value=[],
+      name='key', full_name='main.NodeList.NodesEntry.key', index=0,
+      number=1, type=3, cpp_type=2, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='value', full_name='main.NodeList.NodesEntry.value', index=1,
+      number=2, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
@@ -443,6 +450,37 @@ _NODELIST = _descriptor.Descriptor(
   nested_types=[],
   enum_types=[
   ],
+  serialized_options=b'8\001',
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=798,
+  serialized_end=842,
+)
+
+_NODELIST = _descriptor.Descriptor(
+  name='NodeList',
+  full_name='main.NodeList',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='nodes', full_name='main.NodeList.nodes', index=0,
+      number=1, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[_NODELIST_NODESENTRY, ],
+  enum_types=[
+  ],
   serialized_options=None,
   is_extendable=False,
   syntax='proto3',
@@ -450,7 +488,7 @@ _NODELIST = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=744,
-  serialized_end=771,
+  serialized_end=842,
 )
 
 _TRIGGER_METADATAENTRY.containing_type = _TRIGGER
@@ -460,6 +498,8 @@ _COMPLEXLOG_LOGMETADATAENTRY.containing_type = _COMPLEXLOG
 _COMPLEXLOG.fields_by_name['logmetadata'].message_type = _COMPLEXLOG_LOGMETADATAENTRY
 _CONTROLCOMMAND_METADATAENTRY.containing_type = _CONTROLCOMMAND
 _CONTROLCOMMAND.fields_by_name['metadata'].message_type = _CONTROLCOMMAND_METADATAENTRY
+_NODELIST_NODESENTRY.containing_type = _NODELIST
+_NODELIST.fields_by_name['nodes'].message_type = _NODELIST_NODESENTRY
 DESCRIPTOR.message_types_by_name['Trigger'] = _TRIGGER
 DESCRIPTOR.message_types_by_name['Acknowledge'] = _ACKNOWLEDGE
 DESCRIPTOR.message_types_by_name['MeshOrchStatus'] = _MESHORCHSTATUS
@@ -536,17 +576,26 @@ _sym_db.RegisterMessage(ControlCommand)
 _sym_db.RegisterMessage(ControlCommand.MetadataEntry)
 
 NodeList = _reflection.GeneratedProtocolMessageType('NodeList', (_message.Message,), {
+
+  'NodesEntry' : _reflection.GeneratedProtocolMessageType('NodesEntry', (_message.Message,), {
+    'DESCRIPTOR' : _NODELIST_NODESENTRY,
+    '__module__' : 'proto.fyrmesh_pb2'
+    # @@protoc_insertion_point(class_scope:main.NodeList.NodesEntry)
+    })
+  ,
   'DESCRIPTOR' : _NODELIST,
   '__module__' : 'proto.fyrmesh_pb2'
   # @@protoc_insertion_point(class_scope:main.NodeList)
   })
 _sym_db.RegisterMessage(NodeList)
+_sym_db.RegisterMessage(NodeList.NodesEntry)
 
 
 DESCRIPTOR._options = None
 _TRIGGER_METADATAENTRY._options = None
 _COMPLEXLOG_LOGMETADATAENTRY._options = None
 _CONTROLCOMMAND_METADATAENTRY._options = None
+_NODELIST_NODESENTRY._options = None
 
 _INTERFACE = _descriptor.ServiceDescriptor(
   name='Interface',
@@ -555,8 +604,8 @@ _INTERFACE = _descriptor.ServiceDescriptor(
   index=0,
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_start=773,
-  serialized_end=881,
+  serialized_start=844,
+  serialized_end=952,
   methods=[
   _descriptor.MethodDescriptor(
     name='Read',
@@ -591,8 +640,8 @@ _ORCHESTRATOR = _descriptor.ServiceDescriptor(
   index=1,
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_start=884,
-  serialized_end=1187,
+  serialized_start=955,
+  serialized_end=1258,
   methods=[
   _descriptor.MethodDescriptor(
     name='Status',

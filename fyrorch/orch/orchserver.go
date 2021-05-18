@@ -98,7 +98,7 @@ func (server *OrchestratorServer) Status(ctx context.Context, trigger *pb.Trigge
 		Connected:     server.meshorchestrator.MeshConnected,
 		ControllerID:  server.meshorchestrator.ControllerID,
 		ControlnodeID: int64(server.meshorchestrator.Controlnode.NodeID),
-		Nodelist:      &pb.NodeList{NodeIDs: server.meshorchestrator.NodeIDlist},
+		Nodelist:      &pb.NodeList{Nodes: server.meshorchestrator.GetSimpleNodeList()},
 		MeshSSID:      server.meshorchestrator.Controlnode.MeshSSID,
 		MeshPSWD:      server.meshorchestrator.Controlnode.MeshPSWD,
 		MeshPORT:      int32(server.meshorchestrator.Controlnode.MeshPORT),
@@ -172,7 +172,7 @@ func (server *OrchestratorServer) Command(ctx context.Context, controlcommand *p
 // Accepts a Trigger and returns a NodeList.
 func (server *OrchestratorServer) Nodelist(ctx context.Context, trigger *pb.Trigger) (*pb.NodeList, error) {
 	// Return the list of nodes currently on the mesh as a NodeList proto
-	return &pb.NodeList{NodeIDs: server.meshorchestrator.NodeIDlist}, nil
+	return &pb.NodeList{Nodes: server.meshorchestrator.GetSimpleNodeList()}, nil
 }
 
 // A function that handles the output of the commands recieved over a given command queue

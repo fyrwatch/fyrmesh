@@ -43,6 +43,9 @@ is currently set as being connected to the controller (meshconnected).`,
 			fmt.Printf("[error] call to read mesh status failed -%v", err)
 		}
 
+		// Retrieve the map of nodes
+		nodelist := meshstatus.GetNodelist().GetNodes()
+
 		// Print the mesh status values.
 		fmt.Printf("mesh connection state: %v\n", meshstatus.GetConnected())
 		fmt.Println()
@@ -55,9 +58,10 @@ is currently set as being connected to the controller (meshconnected).`,
 		fmt.Println()
 		fmt.Println("mesh nodelist:")
 
-		nodelist := meshstatus.GetNodelist().GetNodeIDs()
-		for index, node := range nodelist {
-			fmt.Printf("%v] %v\n", index, node)
+		index := 1
+		for nodeid, nodeconfig := range nodelist {
+			fmt.Printf("%v] %v\t%v\n", index, nodeid, nodeconfig)
+			index++
 		}
 	},
 }

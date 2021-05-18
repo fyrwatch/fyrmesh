@@ -42,7 +42,7 @@ message ControlCommand {
 }
 
 message NodeList {
-    repeated int64 nodeIDs = 1;
+    map<int64, string> nodes = 1;
 }
 
 service Interface {

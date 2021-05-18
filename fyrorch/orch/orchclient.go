@@ -139,7 +139,7 @@ func Call_ORCH_Command(client pb.OrchestratorClient, command map[string]string) 
 
 // A function that calls the 'Nodelist' method of the ORCH server over a gRPC connection.
 // Requires the ORCH client and returns a slice of int64.
-func Call_ORCH_Nodelist(client pb.OrchestratorClient) ([]int64, error) {
+func Call_ORCH_Nodelist(client pb.OrchestratorClient) (map[int64]string, error) {
 	// Call the Nodelist method with the Trigger proto
 	nodelist, err := client.Nodelist(context.Background(), &pb.Trigger{Triggermessage: "nodelist-request"})
 
@@ -149,6 +149,6 @@ func Call_ORCH_Nodelist(client pb.OrchestratorClient) ([]int64, error) {
 	}
 
 	// Obtain the slice of node IDs and return it.
-	nodeIDs := nodelist.GetNodeIDs()
-	return nodeIDs, nil
+	nodes := nodelist.GetNodes()
+	return nodes, nil
 }

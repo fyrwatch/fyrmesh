@@ -37,7 +37,7 @@ var nodelistCmd = &cobra.Command{
 			fmt.Printf("[error] connection to ORCH gRPC server could not be established - %v\n", err)
 		}
 
-		// Call the Status method.
+		// Call the Nodelist method.
 		nodelist, err := orch.Call_ORCH_Nodelist(*client)
 		if err != nil {
 			fmt.Printf("[error] call to read mesh node list failed -%v", err)
@@ -45,8 +45,42 @@ var nodelistCmd = &cobra.Command{
 
 		// Iterate over the nodelist and print it.
 		fmt.Println("mesh nodelist:")
-		for index, node := range nodelist {
-			fmt.Printf("%v] %v\n", index, node)
+
+		index := 1
+		for nodeid, nodeconfig := range nodelist {
+			fmt.Printf("%v] %v\t%v\n", index, nodeid, nodeconfig)
+			index++
+		}
+	},
+}
+
+// nodelistCmd represents the nodelist command
+var nodelistUpdateCmd = &cobra.Command{
+	Use:   "update",
+	Short: "Updates the list of nodes connected to the mesh.",
+	Long:  `Updates the list of nodes connected to the mesh.`,
+
+	Run: func(cmd *cobra.Command, args []string) {
+		// Connect to the ORCH gRPC server.
+		client, conn, err := orch.GRPCconnect_ORCH()
+		defer conn.Close()
+		if err != nil {
+			fmt.Printf("[error] connection to ORCH gRPC server could not be established - %v\n", err)
+		}
+
+		// Call the Command method.
+		commandmap := map[string]string{"command": "readnodelist-control"}
+		success, err := orch.Call_ORCH_Command(*client, commandmap)
+		if err != nil {
+			fmt.Printf("[error] call to update mesh node list failed -%v", err)
+		}
+
+		// Check the success value and print output
+		if success {
+			fmt.Println("[success] command to update nodelist was sent successfully")
+		} else {
+			fmt.Println("[failure] command to update nodelist failed to be sent")
+			fmt.Printf("[error] %v\n", err)
 		}
 	},
 }
@@ -54,4 +88,6 @@ var nodelistCmd = &cobra.Command{
 func init() {
 	// Add the command 'nodelist' to root CLI command.
 	rootCmd.AddCommand(nodelistCmd)
+	//
+	nodelistCmd.AddCommand(nodelistUpdateCmd)
 }
