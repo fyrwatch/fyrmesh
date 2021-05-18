@@ -14,7 +14,33 @@ package tools
 import (
 	"fmt"
 	"strconv"
+	"strings"
 )
+
+// A function that compares if two integer slices are equal regardless of order.
+// The algorithm is adopted from the StackOverflow post @ https://stackoverflow.com/a/36000696
+func checkSliceEquality(x, y []int) bool {
+	if len(x) != len(y) {
+		return false
+	}
+	// create a map of string -> int
+	diff := make(map[int]int, len(x))
+	for _, _x := range x {
+		// 0 value for int is 0, so just increment a counter for the string
+		diff[_x]++
+	}
+	for _, _y := range y {
+		// If the string _y is not in diff bail out early
+		if _, ok := diff[_y]; !ok {
+			return false
+		}
+		diff[_y] -= 1
+		if diff[_y] == 0 {
+			delete(diff, _y)
+		}
+	}
+	return len(diff) == 0
+}
 
 // A struct that defines a sensor node
 // and its hardware configuration values.
@@ -158,8 +184,11 @@ type MeshOrchestrator struct {
 	// A ControlNode object that contains the configuration of the mesh control node
 	Controlnode ControlNode
 
-	// A slice of SensorNode objects that contains the list of sensor nodes on the mesh
-	Nodelist []SensorNode
+	// A map of int keys and SensorNode values that contains the list of sensor nodes on the mesh
+	Nodelist map[int]SensorNode
+
+	// A slice of int that contains the list of all node IDs on the mesh
+	NodeIDlist []int
 
 	// A channel of Logs that is used by all components to communicate between each other and to the console
 	LogQueue chan Log
@@ -176,6 +205,7 @@ type MeshOrchestrator struct {
 // The value of MeshConnected is false by default.
 // The value of the Controlnode is set to null ControlNode until it is updated.
 // The value of the ControllerID is retrieved from the config file's DeviceID.
+// The value of the NodeList and NodeIDlist are set as empty slices.
 func NewMeshOrchestrator() (*MeshOrchestrator, error) {
 	// Create a null MeshOrchestrator
 	meshorchestrator := MeshOrchestrator{}
@@ -184,6 +214,10 @@ func NewMeshOrchestrator() (*MeshOrchestrator, error) {
 	meshorchestrator.MeshConnected = false
 	// Set the control node of the mesh
 	meshorchestrator.Controlnode = ControlNode{}
+	// Set the list of node IDs on the mesh to an emtpy slice of int
+	meshorchestrator.NodeIDlist = make([]int, 0)
+	// Set the list of nodes on the mesh to an empty slice of SensorNode
+	meshorchestrator.Nodelist = make(map[int]SensorNode)
 
 	// Create a log channel that will be used to pass all logs within the server.
 	meshorchestrator.LogQueue = make(chan Log)
@@ -210,4 +244,132 @@ func (meshorchestrator *MeshOrchestrator) Close() {
 	close(meshorchestrator.ObserverQueue)
 	close(meshorchestrator.CommandQueue)
 	close(meshorchestrator.LogQueue)
+}
+
+// A method of MeshOrchestrator that sends commands to the commandqueue
+// that will trigger events that configure the Controlnode, the NodeList
+// and the NodeListID fields
+func (meshorchestrator *MeshOrchestrator) Initialize() {
+	// Send the command to read the control node config to the CommandQueue
+	command := map[string]string{"command": "readconfig-control"}
+	meshorchestrator.CommandQueue <- command
+
+	// Send the command to read the mesh node list to the CommandQueue
+	command = map[string]string{"command": "readnodelist-control"}
+	meshorchestrator.CommandQueue <- command
+}
+
+// A method of MeshOrchestrator that accepts a Log of type 'nodelist' and parses the nodelist sequence
+// on it into a slice of integer nodeIDs and assigns it to the NodeIDlist field. Finally calls the
+// method to update the NodeList based on the new NodeIDlist.
+func (meshorchestrator *MeshOrchestrator) SetNodeIDlist(log Log) error {
+	// Retrieve the type of the Log
+	logtype := log.GetLogtype()
+	// Check if the logtype is 'controlconfig'
+	if logtype != "nodelist" {
+		return fmt.Errorf("log is not of type 'nodelist'")
+	}
+
+	// Retrieve the log metadata
+	logmetadata := log.GetLogmetadata()
+	// Retrieve the nodelist sequence from the metadata
+	seqnodelist := logmetadata["nodelist"]
+	// Trim the nodelist sequence for trailing splitters
+	seqnodelist = strings.TrimSuffix(seqnodelist, "-")
+	// Split the nodelist sequence into a slice of strings
+	strnodelist := strings.Split(seqnodelist, "-")
+
+	// Declare nodelist of type slice of int
+	var nodelist []int
+	// Iterate over the string nodelist slice
+	for _, strnode := range strnodelist {
+		// Convert the string to an int and append it to the int nodelist
+		node, _ := strconv.Atoi(strnode)
+		nodelist = append(nodelist, node)
+	}
+
+	// Assign the new NodeIDlist
+	meshorchestrator.NodeIDlist = nodelist
+	// Call the method to update the NodeList based on the new NodeIDlist
+	meshorchestrator.UpdateNodelist()
+	return nil
+}
+
+// A method of MeshOrchestrator that sets the value of the Controlnode field.
+// Accepts a log of type 'controlconfig' and constructs a ControlNode from the log.
+func (meshorchestrator *MeshOrchestrator) SetControlnode(log Log) error {
+	// Retrieve the type of the Log
+	logtype := log.GetLogtype()
+	// Check if the logtype is 'controlconfig'
+	if logtype != "controlconfig" {
+		return fmt.Errorf("log is not of type 'controlconfig'")
+	}
+
+	// Construct a new ControlNode
+	controlnode, err := NewControlNode(log)
+	if err != nil {
+		return fmt.Errorf("control node config could not be constructed - %v", err)
+	}
+
+	// Assign the controlnode to the meshorchestrator
+	meshorchestrator.Controlnode = *controlnode
+	return nil
+}
+
+// A method of MeshOrchestrator that adds/updates the Node on the Nodelist map.
+// Accepts a log og type 'configdata' and constructs a SensorNode from the log.
+// The SensorNode is then added to the Nodelist with the NodeID being the key.
+func (meshorchestrator *MeshOrchestrator) SetNode(log Log) error {
+	// Retrieve the type of the Log
+	logtype := log.GetLogtype()
+	// Check if the logtype is 'controlconfig'
+	if logtype != "configdata" {
+		return fmt.Errorf("log is not of type 'configdata'")
+	}
+
+	// Construct a new SensorNode
+	sensornode, err := NewSensorNode(log)
+	if err != nil {
+		return fmt.Errorf("sensor node config could not be constructed - %v", err)
+	}
+
+	// Assign the sensornode to the meshorchestrator's Nodelist
+	meshorchestrator.Nodelist[sensornode.NodeID] = *sensornode
+	return nil
+}
+
+// A method of MeshOrchestrator that sends the command to
+// retreieve a new copy of the nodelist from the mesh.
+func (meshorchestrator *MeshOrchestrator) UpdateNodeIDlist() {
+	// Send the command to read a copy of the current mesh node list to the CommandQueue
+	command := map[string]string{"command": "readnodelist-control"}
+	meshorchestrator.CommandQueue <- command
+}
+
+// A method of MeshhOrchestrator that sets updates the NodeList field.
+// Compares the NodeIDlist field with a slice of NodeID integers collected
+// from the NodeList. If they are equal, no updation is performed, otherwise
+// a command is sent to ping the entire mesh for configdata, each of which
+// will accumulate into the NodeList map.
+func (meshorchestrator *MeshOrchestrator) UpdateNodelist() {
+	// Retrieve the current Nodelist
+	oldNodelist := meshorchestrator.Nodelist
+	// Retrieve the current(updated) NodeIDlist
+	newNodeIDlist := meshorchestrator.NodeIDlist
+
+	// Declare a slice of int
+	var oldNodeIDlist []int
+	// Iterate over the keys of the Nodelits
+	for nodeid := range oldNodelist {
+		// Append the integer keys into the slice
+		oldNodeIDlist = append(oldNodeIDlist, nodeid)
+	}
+
+	// Check if the two NodeIDlists are equal
+	result := checkSliceEquality(oldNodeIDlist, newNodeIDlist)
+	if !result {
+		// If they are not equal, send the command to ping the mesh for config data to the CommandQueue
+		command := map[string]string{"command": "readconfig-mesh"}
+		meshorchestrator.CommandQueue <- command
+	}
 }

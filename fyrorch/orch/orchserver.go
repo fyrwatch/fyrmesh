@@ -160,6 +160,9 @@ func Start_ORCH_Server(linkclient pb.InterfaceClient, meshorchestrator *tools.Me
 	// Start a go-routine to check the server's command queue and push them to LINK server
 	go pushcommands(linkclient, meshorchestrator)
 
+	// Call the Initialize method the meshorchestrator to configure the node list and control node fields.
+	meshorchestrator.Initialize()
+
 	// Serve the gRPC server on the listener port
 	if err := grpcserver.Serve(listener); err != nil {
 		return fmt.Errorf("could not start the server - %v", err)

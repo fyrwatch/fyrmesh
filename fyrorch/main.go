@@ -45,7 +45,6 @@ func main() {
 	// Start the go routine that starts streaming logs from the LINK server
 	go orch.Call_LINK_Read(*client, meshorchestrator.LogQueue)
 
-	// TODO: Call the methods to configure the nodelist and control node information for the first time.
 	// TODO: Setup Firebase Cloud Listener
 	// TODO: Setup Task Generator and Scheduler
 

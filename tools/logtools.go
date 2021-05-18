@@ -290,7 +290,8 @@ func LogHandler(meshorchestrator *MeshOrchestrator) {
 			}
 
 		case "newconnection", "changedconnection":
-			// TODO: send command to update nodelist
+			// Call the method to update the meshorchestrator's NodeIDlist
+			meshorchestrator.UpdateNodeIDlist()
 
 			// Stringify and print
 			fmt.Println(StringifyLog(log))
@@ -304,7 +305,7 @@ func LogHandler(meshorchestrator *MeshOrchestrator) {
 			metadata := log.GetLogmetadata()
 			sensordata := Deepdeserialize(metadata["sensors"])
 			// Temporary usage
-			fmt.Printf("sensor data - %v\n", sensordata)
+			fmt.Printf("[ORCH][~][~] sensor data - %v\n", sensordata)
 
 			// Stringify and print
 			fmt.Println(StringifyLog(log))
@@ -314,7 +315,8 @@ func LogHandler(meshorchestrator *MeshOrchestrator) {
 			}
 
 		case "configdata":
-			// TODO: update node config
+			// Set the node configuration on the meshorchestrator's Nodelist
+			meshorchestrator.SetNode(log)
 
 			// Stringify and print
 			fmt.Println(StringifyLog(log))
@@ -324,7 +326,8 @@ func LogHandler(meshorchestrator *MeshOrchestrator) {
 			}
 
 		case "controlconfig":
-			// TODO: update server control node config
+			// Set the meshorchestrator's Controlnode
+			meshorchestrator.SetControlnode(log)
 
 			// Stringify and print
 			fmt.Println(StringifyLog(log))
@@ -334,7 +337,8 @@ func LogHandler(meshorchestrator *MeshOrchestrator) {
 			}
 
 		case "nodelist":
-			// TODO: update server nodelist
+			// Set the meshorchestrator's NodeIDlist
+			meshorchestrator.SetNodeIDlist(log)
 
 			// Stringify and print
 			fmt.Println(StringifyLog(log))
