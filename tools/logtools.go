@@ -24,7 +24,7 @@ func currenttimeISO() string {
 
 // A function that deserializes a a string with a format akin
 // to 'key1-value1=key2-value2..' into a map[string]string """
-func deepdeserialize(str string) map[string]string {
+func Deepdeserialize(str string) map[string]string {
 	// Split the string into individual key-value pairs
 	pairs := strings.Split(str, "=")
 	// Define a new map[string]string oject
@@ -271,12 +271,12 @@ func StringifyLog(log Log) string {
 
 // A function that handles the output of the logs recieved
 // over a given logqueue. Currently only prints to stdout.
-func LogHandler(logqueue chan Log, observerqueue chan ObserverLog) {
+func LogHandler(meshorchestrator *MeshOrchestrator) {
 	// Declare the observer toggle
 	observertoggle := false
 
 	// Iterate over the logqueue until it closes.
-	for log := range logqueue {
+	for log := range meshorchestrator.LogQueue {
 
 		// Check the source of the log
 		logtype := log.GetLogtype()
@@ -286,7 +286,7 @@ func LogHandler(logqueue chan Log, observerqueue chan ObserverLog) {
 			fmt.Println(StringifyLog(log))
 			// Send into observer queue if toggle is set
 			if observertoggle {
-				observerqueue <- *NewObserverLog(log)
+				meshorchestrator.ObserverQueue <- *NewObserverLog(log)
 			}
 
 		case "newconnection", "changedconnection":
@@ -296,13 +296,13 @@ func LogHandler(logqueue chan Log, observerqueue chan ObserverLog) {
 			fmt.Println(StringifyLog(log))
 			// Send into observer queue if toggle is set
 			if observertoggle {
-				observerqueue <- *NewObserverLog(log)
+				meshorchestrator.ObserverQueue <- *NewObserverLog(log)
 			}
 
 		case "sensordata":
 			// TODO: send to ping collector
 			metadata := log.GetLogmetadata()
-			sensordata := deepdeserialize(metadata["sensors"])
+			sensordata := Deepdeserialize(metadata["sensors"])
 			// Temporary usage
 			fmt.Printf("sensor data - %v\n", sensordata)
 
@@ -310,7 +310,7 @@ func LogHandler(logqueue chan Log, observerqueue chan ObserverLog) {
 			fmt.Println(StringifyLog(log))
 			// Send into observer queue if toggle is set
 			if observertoggle {
-				observerqueue <- *NewObserverLog(log)
+				meshorchestrator.ObserverQueue <- *NewObserverLog(log)
 			}
 
 		case "configdata":
@@ -320,7 +320,7 @@ func LogHandler(logqueue chan Log, observerqueue chan ObserverLog) {
 			fmt.Println(StringifyLog(log))
 			// Send into observer queue if toggle is set
 			if observertoggle {
-				observerqueue <- *NewObserverLog(log)
+				meshorchestrator.ObserverQueue <- *NewObserverLog(log)
 			}
 
 		case "controlconfig":
@@ -330,7 +330,7 @@ func LogHandler(logqueue chan Log, observerqueue chan ObserverLog) {
 			fmt.Println(StringifyLog(log))
 			// Send into observer queue if toggle is set
 			if observertoggle {
-				observerqueue <- *NewObserverLog(log)
+				meshorchestrator.ObserverQueue <- *NewObserverLog(log)
 			}
 
 		case "nodelist":
@@ -340,7 +340,7 @@ func LogHandler(logqueue chan Log, observerqueue chan ObserverLog) {
 			fmt.Println(StringifyLog(log))
 			// Send into observer queue if toggle is set
 			if observertoggle {
-				observerqueue <- *NewObserverLog(log)
+				meshorchestrator.ObserverQueue <- *NewObserverLog(log)
 			}
 
 		case "observertoggle":

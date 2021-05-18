@@ -19,38 +19,40 @@ import (
 )
 
 func main() {
-	// Create a log channel that will be used to pass all logs within the server.
-	logqueue := make(chan tools.Log)
-	// Create an observer channel that will be used to pass observation logs.
-	observerqueue := make(chan tools.ObserverLog)
-	// Create a command queue that will be passed into the Orchestrator to siphon commands to the LINK.
-	commandqueue := make(chan map[string]string)
+	// Construct a new MeshOrchestrator
+	meshorchestrator, err := tools.NewMeshOrchestrator()
+	if err != nil {
+		// Generate an ORCH serverlog and print it. (The logqueue was never built and hence cannot it be pushed into)
+		logmessage := tools.NewOrchServerlog(fmt.Sprintf("mesh orchestrator could not be constructed. error - %v", err))
+		fmt.Println(tools.StringifyLog(logmessage))
+	}
 
-	// Defer the closing of the created channels
-	defer close(logqueue)
-	defer close(observerqueue)
-	defer close(commandqueue)
+	// Defer the closing of the meshorchestrator channels
+	defer meshorchestrator.Close()
 
-	//start a go-routine that handles log parsing, formatting, printing and forwarding.
-	go tools.LogHandler(logqueue, observerqueue)
+	// Start a go-routine that handles log parsing, formatting, printing and forwarding.
+	go tools.LogHandler(meshorchestrator)
 
 	// Initiate the connect runtime to the LINK server over gRPC
 	client, conn, err := orch.GRPCconnect_LINK()
 	defer conn.Close()
 	if err != nil {
+		// Generate an ORCH serverlog and send it over the LogQueue of the meshorchestrator
 		logmessage := tools.NewOrchServerlog(fmt.Sprintf("connection to LINK server could not be established. error - %v", err))
-		logqueue <- logmessage
+		meshorchestrator.LogQueue <- logmessage
 	}
 
+	// Start the go routine that starts streaming logs from the LINK server
+	go orch.Call_LINK_Read(*client, meshorchestrator.LogQueue)
+
+	// TODO: Call the methods to configure the nodelist and control node information for the first time.
 	// TODO: Setup Firebase Cloud Listener
 	// TODO: Setup Task Generator and Scheduler
 
-	// Start the go routine that initiates a read stream from the LINK server
-	go orch.Call_LINK_Read(*client, logqueue)
-
 	// Start the Orchestrator ORCH gRPC Server
-	if err = orch.Start_ORCH_Server(*client, logqueue, commandqueue, observerqueue); err != nil {
+	if err = orch.Start_ORCH_Server(*client, meshorchestrator); err != nil {
+		// Generate an ORCH serverlog and send it over the LogQueue of the meshorchestrator
 		logmessage := tools.NewOrchServerlog(fmt.Sprintf("starting the ORCH server failed. error - %v", err))
-		logqueue <- logmessage
+		meshorchestrator.LogQueue <- logmessage
 	}
 }

@@ -25,11 +25,7 @@ import (
 // A struct that defines the Orchestrator gRPC Server
 type OrchestratorServer struct {
 	pb.UnimplementedOrchestratorServer
-	meshconnected  bool
-	meshidentifier string
-	commandqueue   chan map[string]string
-	observerqueue  chan tools.ObserverLog
-	logqueue       chan tools.Log
+	meshorchestrator tools.MeshOrchestrator
 }
 
 // A function that implements the 'Connection' method of the Orchestrator service.
@@ -42,17 +38,17 @@ func (server *OrchestratorServer) Connection(ctx context.Context, trigger *pb.Tr
 	switch triggermessage {
 	case "setconnection-on":
 		// Set the meshconnected value to True
-		server.meshconnected = true
+		server.meshorchestrator.MeshConnected = true
 		// Send a command to the server's command queue
 		command := map[string]string{"command": "connection-on"}
-		server.commandqueue <- command
+		server.meshorchestrator.CommandQueue <- command
 
 	case "setconnection-off":
 		// Set the meshconnected value to True
-		server.meshconnected = false
+		server.meshorchestrator.MeshConnected = false
 		// Send a command to the server's command queue
 		command := map[string]string{"command": "connection-off"}
-		server.commandqueue <- command
+		server.meshorchestrator.CommandQueue <- command
 
 	default:
 		// Default to returning a fail Acknowledge because of an unsupported command message
@@ -76,10 +72,10 @@ func (server *OrchestratorServer) Observe(trigger *pb.Trigger, stream pb.Orchest
 
 	// Send the signal to enable the observer queue for the log handler.
 	obstoggle := tools.NewObsCommand("enable-observe")
-	server.logqueue <- obstoggle
+	server.meshorchestrator.LogQueue <- obstoggle
 
 	// Iterate over the observer channel
-	for log := range server.observerqueue {
+	for log := range server.meshorchestrator.ObserverQueue {
 		// Send each log recieved on the channel to the stream.
 		err := stream.Send(&pb.SimpleLog{Message: log.Logmessage})
 		if err != nil {
@@ -89,7 +85,7 @@ func (server *OrchestratorServer) Observe(trigger *pb.Trigger, stream pb.Orchest
 
 	// Send the signal to disable the observer queue for the log handler.
 	obstoggle = tools.NewObsCommand("disable-observe")
-	server.logqueue <- obstoggle
+	server.meshorchestrator.LogQueue <- obstoggle
 
 	return nil
 }
@@ -99,8 +95,8 @@ func (server *OrchestratorServer) Observe(trigger *pb.Trigger, stream pb.Orchest
 func (server *OrchestratorServer) Status(ctx context.Context, trigger *pb.Trigger) (*pb.MeshStatus, error) {
 	// Return values from the server configuration as MeshStatus object.
 	return &pb.MeshStatus{
-		MeshID:    server.meshidentifier,
-		Connected: server.meshconnected,
+		MeshID:    server.meshorchestrator.ControllerID,
+		Connected: server.meshorchestrator.MeshConnected,
 	}, nil
 }
 
@@ -115,7 +111,7 @@ func (server *OrchestratorServer) Ping(ctx context.Context, trigger *pb.Trigger)
 	case "send-ping-mesh":
 		// Send a command to the server's command queue
 		command := map[string]string{"command": "readsensors-mesh"}
-		server.commandqueue <- command
+		server.meshorchestrator.CommandQueue <- command
 
 	case "send-ping-node":
 		// Returning a fail Acknowledge because of an unimplemented command message.
@@ -133,16 +129,16 @@ func (server *OrchestratorServer) Ping(ctx context.Context, trigger *pb.Trigger)
 // A function that handles the output of the commands recieved over a given command queue
 // by passing each recieved command to function that calls the the 'Write' method of the
 // interface LINK server. Iterates infinitely until the commandqueue is closed.
-func pushcommands(linkclient pb.InterfaceClient, logqueue chan tools.Log, commandqueue chan map[string]string) {
-	for command := range commandqueue {
-		Call_LINK_Write(linkclient, logqueue, command)
+func pushcommands(linkclient pb.InterfaceClient, meshorchestrator *tools.MeshOrchestrator) {
+	for command := range meshorchestrator.CommandQueue {
+		Call_LINK_Write(linkclient, meshorchestrator.LogQueue, command)
 	}
 }
 
 // A function that creates the gRPC server for the Orchestrator ORCH service
 // and sets it to listen on the appropriate port. Starts a go routine to check
 // the server's command queue
-func Start_ORCH_Server(linkclient pb.InterfaceClient, logqueue chan tools.Log, commandqueue chan map[string]string, obsqueue chan tools.ObserverLog) error {
+func Start_ORCH_Server(linkclient pb.InterfaceClient, meshorchestrator *tools.MeshOrchestrator) error {
 	// Read the config file
 	config, err := tools.ReadConfig()
 	if err != nil {
@@ -159,16 +155,10 @@ func Start_ORCH_Server(linkclient pb.InterfaceClient, logqueue chan tools.Log, c
 
 	// Create the gRPC server and register it with the commandqueue, observerqueue and the logqueue
 	grpcserver := grpc.NewServer()
-	pb.RegisterOrchestratorServer(grpcserver, &OrchestratorServer{
-		meshconnected:  false,
-		meshidentifier: config.DeviceID,
-		commandqueue:   commandqueue,
-		observerqueue:  obsqueue,
-		logqueue:       logqueue,
-	})
+	pb.RegisterOrchestratorServer(grpcserver, &OrchestratorServer{meshorchestrator: *meshorchestrator})
 
 	// Start a go-routine to check the server's command queue and push them to LINK server
-	go pushcommands(linkclient, logqueue, commandqueue)
+	go pushcommands(linkclient, meshorchestrator)
 
 	// Serve the gRPC server on the listener port
 	if err := grpcserver.Serve(listener); err != nil {
