@@ -54,6 +54,15 @@ def strparse(data):
     except:
         return None
 
+def deepserialize(data: dict):
+    """ A function that serializes a dictionary into a string with a format akin to 'key1-value1=key2-value2..'"""
+    strdata = ""
+    for key, value in data.items():
+        strdata = strdata + f"{key}-{value}="
+
+    strdata = strdata.strip("=")
+    return strdata
+
 def meshlogparse(meshlog: dict):
     """ A function that parses a meshlog dictionary and adds it to the logqueue with the approptiate formatting """
 
@@ -66,7 +75,7 @@ def meshlogparse(meshlog: dict):
             "type": "newconnection", 
             "log": "new node on mesh", 
             "metadata": {
-                "node": meshlogdata['newnode']
+                "node": str(meshlogdata['newnode'])
             }
         })
     
@@ -82,7 +91,7 @@ def meshlogparse(meshlog: dict):
             "type": "nodetimeadjust", 
             "log": "node time was adjusted to sync with the mesh", 
             "metadata": {
-                "offset": meshlogdata['offset']
+                "offset": str(meshlogdata['offset'])
             }
         })
 
@@ -91,7 +100,7 @@ def meshlogparse(meshlog: dict):
             "type": "handshake", 
             "log": "handshake completed with a node", 
             "metadata": {
-                "node": meshlogdata['node']
+                "node": str(meshlogdata['node'])
             }
         })
 
@@ -101,8 +110,8 @@ def meshlogparse(meshlog: dict):
             "log": "sensor data received", 
             "metadata": {
                 "ping": meshlogdata['ping'],
-                "node": meshlogdata['node'],
-                "sensors": meshlogdata['sensors']
+                "node": str(meshlogdata['node']),
+                "sensors": deepserialize(meshlogdata['sensors'])
             }
         })
 
@@ -112,8 +121,8 @@ def meshlogparse(meshlog: dict):
             "log": "config data received", 
             "metadata": {
                 "ping": meshlogdata['ping'],
-                "node": meshlogdata['node'],
-                "config": meshlogdata['config']
+                "node": str(meshlogdata['node']),
+                "config": deepserialize(meshlogdata['config'])
             }
         })
 
@@ -122,8 +131,8 @@ def meshlogparse(meshlog: dict):
             "type": "controlconfig",
             "log": "control node config data received",
             "metadata": {
-                "nodeID": meshlogdata["config"]["NODEID"],
-                "config": meshlogdata["config"]
+                "nodeID": str(meshlogdata["config"]["NODEID"]),
+                "config": deepserialize(meshlogdata['config'])
             }
         })
 

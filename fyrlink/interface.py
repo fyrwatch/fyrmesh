@@ -61,8 +61,9 @@ class Interface(fyrmesh_pb2_grpc.InterfaceServicer):
                     logtime=logtime(), 
                     logmessage="invalid read stream initiation code", 
                     logmetadata={
-                        "server": "LINK client",
-                        "service": "Read"
+                        "server": "LINK",
+                        "service": "Read",
+                        "error": "nil"
                 })
 
         
@@ -79,8 +80,9 @@ class Interface(fyrmesh_pb2_grpc.InterfaceServicer):
                 "source": "LINK", "type": "protolog", "time": logtime(), 
                 "log": f"command '{command}' written to control node successfully",
                 "metadata": {
-                    "server": "LINK client", 
-                    "service": "Write"
+                    "server": "LINK", 
+                    "service": "Write",
+                    "error": "nil"
             }})
 
         except Exception as e:
@@ -88,7 +90,7 @@ class Interface(fyrmesh_pb2_grpc.InterfaceServicer):
                 "source": "LINK", "type": "protolog", "time": logtime(), 
                 "log": f"command '{command}' failed to written to control node.",
                 "metadata": {
-                    "server": "LINK client",
+                    "server": "LINK",
                     "service": "Write",
                     "error": str(e)
             }})
