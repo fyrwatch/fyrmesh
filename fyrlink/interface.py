@@ -73,9 +73,10 @@ class Interface(fyrmesh_pb2_grpc.InterfaceServicer):
         appropriate structure. """
 
         command = request.command
+        metadata = request.metadata
 
         try:
-            commandqueue.put({"type": "controlcommand", "command": command})
+            commandqueue.put({"type": "controlcommand", "command": command, **metadata})
             logqueue.put({
                 "source": "LINK", "type": "protolog", "time": logtime(), 
                 "log": f"command '{command}' written to control node successfully",

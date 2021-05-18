@@ -100,9 +100,9 @@ func Call_ORCH_Status(client pb.OrchestratorClient) (*pb.MeshOrchStatus, error) 
 
 // A function that calls the 'Ping' method of the ORCH server over a gRPC connection.
 // Requires the ORCH client object and returns a boolean success acknowledgment.
-func Call_ORCH_Ping(client pb.OrchestratorClient) (bool, error) {
+func Call_ORCH_Ping(client pb.OrchestratorClient, trigger string, node string, phrase string) (bool, error) {
 	// Call the Ping method with the trigger code for mesh pinging
-	acknowledge, err := client.Ping(context.Background(), &pb.Trigger{Triggermessage: "send-ping-mesh"})
+	acknowledge, err := client.Ping(context.Background(), &pb.Trigger{Triggermessage: trigger, Metadata: map[string]string{"node": node, "phrase": phrase}})
 
 	// Check for errors and return the appropriate acknowledgement and error if any.
 	if err != nil {

@@ -66,7 +66,7 @@ Metadata collection is only done if an even number of args are provided.`,
 			fmt.Println("[success] command was sent successfully")
 		} else {
 			fmt.Println("[failure] command failed to be sent")
-			fmt.Printf("[error] %v", err)
+			fmt.Printf("[error] %v\n", err)
 		}
 	},
 }

@@ -108,23 +108,40 @@ func (server *OrchestratorServer) Status(ctx context.Context, trigger *pb.Trigge
 // A function that implements the 'Ping' method of the Orchestrator service.
 // Accepts a Message and returns an Acknowledge
 func (server *OrchestratorServer) Ping(ctx context.Context, trigger *pb.Trigger) (*pb.Acknowledge, error) {
-	// Retrieve the trigger message from the Message object
+	// Retrieve the trigger message and metadata from the Trigger proto
 	triggermessage := trigger.GetTriggermessage()
+	triggermetadata := trigger.GetMetadata()
 
-	// Check the value of the command message
+	// Check the value of the trigger message
 	switch triggermessage {
-	case "send-ping-mesh":
-		// Send a command to the server's command queue
-		command := map[string]string{"command": "readsensors-mesh"}
+	case "ping-sensor-mesh":
+		// Send a command to ping mesh for sensor data to the server's command queue
+		command := map[string]string{"command": "readsensors-mesh", "ping": fmt.Sprintf("userping-%v", triggermetadata["phrase"])}
 		server.meshorchestrator.CommandQueue <- command
 
-	case "send-ping-node":
-		// Returning a fail Acknowledge because of an unimplemented command message.
-		return &pb.Acknowledge{Success: false, Error: "unimplemented command"}, nil
+	case "ping-sensor-node":
+		// Send a command to ping a node for sensor data to the server's command queue
+		command := map[string]string{"command": "readsensors-node", "ping": fmt.Sprintf("userping-%v", triggermetadata["phrase"]), "node": triggermetadata["node"]}
+		server.meshorchestrator.CommandQueue <- command
+
+	case "ping-config-mesh":
+		// Send a command to ping mesh for config data to the server's command queue
+		command := map[string]string{"command": "readconfig-mesh", "ping": fmt.Sprintf("userping-%v", triggermetadata["phrase"])}
+		server.meshorchestrator.CommandQueue <- command
+
+	case "ping-config-node":
+		// Send a command to ping a node for config data to the server's command queue
+		command := map[string]string{"command": "readconfig-node", "ping": fmt.Sprintf("userping-%v", triggermetadata["phrase"]), "node": triggermetadata["node"]}
+		server.meshorchestrator.CommandQueue <- command
+
+	case "ping-control":
+		// Send a command to ping the control node for config data to the server's command queue
+		command := map[string]string{"command": "readconfig-control", "ping": fmt.Sprintf("userping-%v", triggermetadata["phrase"])}
+		server.meshorchestrator.CommandQueue <- command
 
 	default:
 		// Default to returning a fail Acknowledge because of an unsupported command message.
-		return &pb.Acknowledge{Success: false, Error: "unsupported command"}, nil
+		return &pb.Acknowledge{Success: false, Error: "unsupported trigger command"}, nil
 	}
 
 	// Return an success Acknowledge with no error
