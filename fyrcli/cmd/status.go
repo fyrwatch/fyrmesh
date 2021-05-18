@@ -44,8 +44,21 @@ is currently set as being connected to the controller (meshconnected).`,
 		}
 
 		// Print the mesh status values.
-		fmt.Printf("Mesh ID: %v\n", meshstatus.GetMeshID())
-		fmt.Printf("Mesh Connected: %v\n", meshstatus.GetConnected())
+		fmt.Printf("mesh connection state: %v\n", meshstatus.GetConnected())
+		fmt.Println()
+		fmt.Printf("mesh controller ID: %v\n", meshstatus.GetControllerID())
+		fmt.Printf("mesh controlnode ID: %v\n", meshstatus.GetControlnodeID())
+		fmt.Println()
+		fmt.Printf("mesh SSID: %v\n", meshstatus.GetMeshSSID())
+		fmt.Printf("mesh PORT: %v\n", meshstatus.GetMeshPORT())
+		fmt.Printf("mesh password: %v\n", meshstatus.GetMeshPSWD())
+		fmt.Println()
+		fmt.Println("mesh nodelist:")
+
+		nodelist := meshstatus.GetNodelist().GetNodeIDs()
+		for index, node := range nodelist {
+			fmt.Printf("%v] %v\n", index, node)
+		}
 	},
 }
 

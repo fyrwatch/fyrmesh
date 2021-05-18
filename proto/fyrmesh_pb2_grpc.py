@@ -111,7 +111,7 @@ class OrchestratorStub(object):
         self.Status = channel.unary_unary(
                 '/main.Orchestrator/Status',
                 request_serializer=proto_dot_fyrmesh__pb2.Trigger.SerializeToString,
-                response_deserializer=proto_dot_fyrmesh__pb2.MeshStatus.FromString,
+                response_deserializer=proto_dot_fyrmesh__pb2.MeshOrchStatus.FromString,
                 )
         self.Connection = channel.unary_unary(
                 '/main.Orchestrator/Connection',
@@ -126,6 +126,16 @@ class OrchestratorStub(object):
         self.Ping = channel.unary_unary(
                 '/main.Orchestrator/Ping',
                 request_serializer=proto_dot_fyrmesh__pb2.Trigger.SerializeToString,
+                response_deserializer=proto_dot_fyrmesh__pb2.Acknowledge.FromString,
+                )
+        self.Nodelist = channel.unary_unary(
+                '/main.Orchestrator/Nodelist',
+                request_serializer=proto_dot_fyrmesh__pb2.Trigger.SerializeToString,
+                response_deserializer=proto_dot_fyrmesh__pb2.NodeList.FromString,
+                )
+        self.Command = channel.unary_unary(
+                '/main.Orchestrator/Command',
+                request_serializer=proto_dot_fyrmesh__pb2.ControlCommand.SerializeToString,
                 response_deserializer=proto_dot_fyrmesh__pb2.Acknowledge.FromString,
                 )
 
@@ -157,13 +167,25 @@ class OrchestratorServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def Nodelist(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def Command(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_OrchestratorServicer_to_server(servicer, server):
     rpc_method_handlers = {
             'Status': grpc.unary_unary_rpc_method_handler(
                     servicer.Status,
                     request_deserializer=proto_dot_fyrmesh__pb2.Trigger.FromString,
-                    response_serializer=proto_dot_fyrmesh__pb2.MeshStatus.SerializeToString,
+                    response_serializer=proto_dot_fyrmesh__pb2.MeshOrchStatus.SerializeToString,
             ),
             'Connection': grpc.unary_unary_rpc_method_handler(
                     servicer.Connection,
@@ -178,6 +200,16 @@ def add_OrchestratorServicer_to_server(servicer, server):
             'Ping': grpc.unary_unary_rpc_method_handler(
                     servicer.Ping,
                     request_deserializer=proto_dot_fyrmesh__pb2.Trigger.FromString,
+                    response_serializer=proto_dot_fyrmesh__pb2.Acknowledge.SerializeToString,
+            ),
+            'Nodelist': grpc.unary_unary_rpc_method_handler(
+                    servicer.Nodelist,
+                    request_deserializer=proto_dot_fyrmesh__pb2.Trigger.FromString,
+                    response_serializer=proto_dot_fyrmesh__pb2.NodeList.SerializeToString,
+            ),
+            'Command': grpc.unary_unary_rpc_method_handler(
+                    servicer.Command,
+                    request_deserializer=proto_dot_fyrmesh__pb2.ControlCommand.FromString,
                     response_serializer=proto_dot_fyrmesh__pb2.Acknowledge.SerializeToString,
             ),
     }
@@ -203,7 +235,7 @@ class Orchestrator(object):
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/main.Orchestrator/Status',
             proto_dot_fyrmesh__pb2.Trigger.SerializeToString,
-            proto_dot_fyrmesh__pb2.MeshStatus.FromString,
+            proto_dot_fyrmesh__pb2.MeshOrchStatus.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
@@ -254,6 +286,40 @@ class Orchestrator(object):
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/main.Orchestrator/Ping',
             proto_dot_fyrmesh__pb2.Trigger.SerializeToString,
+            proto_dot_fyrmesh__pb2.Acknowledge.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def Nodelist(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/main.Orchestrator/Nodelist',
+            proto_dot_fyrmesh__pb2.Trigger.SerializeToString,
+            proto_dot_fyrmesh__pb2.NodeList.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def Command(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/main.Orchestrator/Command',
+            proto_dot_fyrmesh__pb2.ControlCommand.SerializeToString,
             proto_dot_fyrmesh__pb2.Acknowledge.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

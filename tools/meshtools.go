@@ -19,12 +19,12 @@ import (
 
 // A function that compares if two integer slices are equal regardless of order.
 // The algorithm is adopted from the StackOverflow post @ https://stackoverflow.com/a/36000696
-func checkSliceEquality(x, y []int) bool {
+func checkSliceEquality(x, y []int64) bool {
 	if len(x) != len(y) {
 		return false
 	}
-	// create a map of string -> int
-	diff := make(map[int]int, len(x))
+	// create a map of int64 -> int
+	diff := make(map[int64]int, len(x))
 	for _, _x := range x {
 		// 0 value for int is 0, so just increment a counter for the string
 		diff[_x]++
@@ -46,7 +46,7 @@ func checkSliceEquality(x, y []int) bool {
 // and its hardware configuration values.
 type SensorNode struct {
 	// The identifier of the node
-	NodeID int
+	NodeID int64
 
 	// The serial baud rate of the node
 	SerialBaud int
@@ -96,7 +96,7 @@ func NewSensorNode(log Log) (*SensorNode, error) {
 	// Create a null SensorNode
 	sensornode := SensorNode{}
 	// Parse and assign the general hardware config values
-	sensornode.NodeID, _ = strconv.Atoi(logconfig["NODEID"])
+	sensornode.NodeID, _ = strconv.ParseInt(logconfig["NODEID"], 0, 64)
 	sensornode.SerialBaud, _ = strconv.Atoi(logconfig["SERIALBAUD"])
 	sensornode.Pinger, _ = strconv.ParseBool(logconfig["PINGER"])
 	sensornode.Pingerpin, _ = strconv.Atoi(logconfig["PINGERPIN"])
@@ -117,7 +117,7 @@ func NewSensorNode(log Log) (*SensorNode, error) {
 // values along with the configuration values that define the mesh.
 type ControlNode struct {
 	// The identifier of the node
-	NodeID int
+	NodeID int64
 
 	// The serial baud rate of the node
 	SerialBaud int
@@ -158,7 +158,7 @@ func NewControlNode(log Log) (*ControlNode, error) {
 	// Create a null SensorNode
 	controlnode := ControlNode{}
 	// Parse and assign the general hardware config values
-	controlnode.NodeID, _ = strconv.Atoi(logconfig["NODEID"])
+	controlnode.NodeID, _ = strconv.ParseInt(logconfig["NODEID"], 0, 64)
 	controlnode.SerialBaud, _ = strconv.Atoi(logconfig["SERIALBAUD"])
 	controlnode.Pinger, _ = strconv.ParseBool(logconfig["PINGER"])
 	controlnode.Pingerpin, _ = strconv.Atoi(logconfig["PINGERPIN"])
@@ -185,10 +185,10 @@ type MeshOrchestrator struct {
 	Controlnode ControlNode
 
 	// A map of int keys and SensorNode values that contains the list of sensor nodes on the mesh
-	Nodelist map[int]SensorNode
+	Nodelist map[int64]SensorNode
 
 	// A slice of int that contains the list of all node IDs on the mesh
-	NodeIDlist []int
+	NodeIDlist []int64
 
 	// A channel of Logs that is used by all components to communicate between each other and to the console
 	LogQueue chan Log
@@ -215,9 +215,9 @@ func NewMeshOrchestrator() (*MeshOrchestrator, error) {
 	// Set the control node of the mesh
 	meshorchestrator.Controlnode = ControlNode{}
 	// Set the list of node IDs on the mesh to an emtpy slice of int
-	meshorchestrator.NodeIDlist = make([]int, 0)
+	meshorchestrator.NodeIDlist = make([]int64, 0)
 	// Set the list of nodes on the mesh to an empty slice of SensorNode
-	meshorchestrator.Nodelist = make(map[int]SensorNode)
+	meshorchestrator.Nodelist = make(map[int64]SensorNode)
 
 	// Create a log channel that will be used to pass all logs within the server.
 	meshorchestrator.LogQueue = make(chan Log)
@@ -280,12 +280,12 @@ func (meshorchestrator *MeshOrchestrator) SetNodeIDlist(log Log) error {
 	strnodelist := strings.Split(seqnodelist, "-")
 
 	// Declare nodelist of type slice of int
-	var nodelist []int
+	var nodelist []int64
 	// Iterate over the string nodelist slice
 	for _, strnode := range strnodelist {
 		// Convert the string to an int and append it to the int nodelist
 		node, _ := strconv.Atoi(strnode)
-		nodelist = append(nodelist, node)
+		nodelist = append(nodelist, int64(node))
 	}
 
 	// Assign the new NodeIDlist
@@ -358,7 +358,7 @@ func (meshorchestrator *MeshOrchestrator) UpdateNodelist() {
 	newNodeIDlist := meshorchestrator.NodeIDlist
 
 	// Declare a slice of int
-	var oldNodeIDlist []int
+	var oldNodeIDlist []int64
 	// Iterate over the keys of the Nodelits
 	for nodeid := range oldNodelist {
 		// Append the integer keys into the slice

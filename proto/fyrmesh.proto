@@ -14,9 +14,14 @@ message Acknowledge {
     string error = 2;
 }
 
-message MeshStatus {
-    string meshID = 1;
-    bool connected = 2;
+message MeshOrchStatus {
+    bool connected = 1;
+    string controllerID = 2;
+    int64 controlnodeID = 3;
+    NodeList nodelist = 4;
+    string meshSSID = 5;
+    string meshPSWD = 6;
+    int32 meshPORT = 7;
 }
 
 message SimpleLog {
@@ -36,14 +41,20 @@ message ControlCommand {
     map<string, string> metadata = 2;
 }
 
+message NodeList {
+    repeated int64 nodeIDs = 1;
+}
+
 service Interface {
     rpc Read (Trigger) returns (stream ComplexLog) {}
     rpc Write (ControlCommand) returns (Acknowledge) {}
 }
 
 service Orchestrator {
-    rpc Status (Trigger) returns (MeshStatus) {}
+    rpc Status (Trigger) returns (MeshOrchStatus) {}
     rpc Connection (Trigger) returns (Acknowledge) {}
     rpc Observe (Trigger) returns (stream SimpleLog) {}
     rpc Ping (Trigger) returns (Acknowledge) {}
+    rpc Nodelist (Trigger) returns (NodeList) {}
+    rpc Command (ControlCommand) returns (Acknowledge) {}
 }

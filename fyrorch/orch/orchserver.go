@@ -25,7 +25,7 @@ import (
 // A struct that defines the Orchestrator gRPC Server
 type OrchestratorServer struct {
 	pb.UnimplementedOrchestratorServer
-	meshorchestrator tools.MeshOrchestrator
+	meshorchestrator *tools.MeshOrchestrator
 }
 
 // A function that implements the 'Connection' method of the Orchestrator service.
@@ -92,11 +92,16 @@ func (server *OrchestratorServer) Observe(trigger *pb.Trigger, stream pb.Orchest
 
 // A function that implements the 'Status' method of the Orchestrator service.
 // Accepts a Message and returns a MeshStatus
-func (server *OrchestratorServer) Status(ctx context.Context, trigger *pb.Trigger) (*pb.MeshStatus, error) {
-	// Return values from the server configuration as MeshStatus object.
-	return &pb.MeshStatus{
-		MeshID:    server.meshorchestrator.ControllerID,
-		Connected: server.meshorchestrator.MeshConnected,
+func (server *OrchestratorServer) Status(ctx context.Context, trigger *pb.Trigger) (*pb.MeshOrchStatus, error) {
+	// Return values from the server configuration as a MeshOrchStatus object.
+	return &pb.MeshOrchStatus{
+		Connected:     server.meshorchestrator.MeshConnected,
+		ControllerID:  server.meshorchestrator.ControllerID,
+		ControlnodeID: int64(server.meshorchestrator.Controlnode.NodeID),
+		Nodelist:      &pb.NodeList{NodeIDs: server.meshorchestrator.NodeIDlist},
+		MeshSSID:      server.meshorchestrator.Controlnode.MeshSSID,
+		MeshPSWD:      server.meshorchestrator.Controlnode.MeshPSWD,
+		MeshPORT:      int32(server.meshorchestrator.Controlnode.MeshPORT),
 	}, nil
 }
 
@@ -155,7 +160,7 @@ func Start_ORCH_Server(linkclient pb.InterfaceClient, meshorchestrator *tools.Me
 
 	// Create the gRPC server and register it with the commandqueue, observerqueue and the logqueue
 	grpcserver := grpc.NewServer()
-	pb.RegisterOrchestratorServer(grpcserver, &OrchestratorServer{meshorchestrator: *meshorchestrator})
+	pb.RegisterOrchestratorServer(grpcserver, &OrchestratorServer{meshorchestrator: meshorchestrator})
 
 	// Start a go-routine to check the server's command queue and push them to LINK server
 	go pushcommands(linkclient, meshorchestrator)

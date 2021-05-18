@@ -168,10 +168,12 @@ var Interface_ServiceDesc = grpc.ServiceDesc{
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type OrchestratorClient interface {
-	Status(ctx context.Context, in *Trigger, opts ...grpc.CallOption) (*MeshStatus, error)
+	Status(ctx context.Context, in *Trigger, opts ...grpc.CallOption) (*MeshOrchStatus, error)
 	Connection(ctx context.Context, in *Trigger, opts ...grpc.CallOption) (*Acknowledge, error)
 	Observe(ctx context.Context, in *Trigger, opts ...grpc.CallOption) (Orchestrator_ObserveClient, error)
 	Ping(ctx context.Context, in *Trigger, opts ...grpc.CallOption) (*Acknowledge, error)
+	Nodelist(ctx context.Context, in *Trigger, opts ...grpc.CallOption) (*NodeList, error)
+	Command(ctx context.Context, in *ControlCommand, opts ...grpc.CallOption) (*Acknowledge, error)
 }
 
 type orchestratorClient struct {
@@ -182,8 +184,8 @@ func NewOrchestratorClient(cc grpc.ClientConnInterface) OrchestratorClient {
 	return &orchestratorClient{cc}
 }
 
-func (c *orchestratorClient) Status(ctx context.Context, in *Trigger, opts ...grpc.CallOption) (*MeshStatus, error) {
-	out := new(MeshStatus)
+func (c *orchestratorClient) Status(ctx context.Context, in *Trigger, opts ...grpc.CallOption) (*MeshOrchStatus, error) {
+	out := new(MeshOrchStatus)
 	err := c.cc.Invoke(ctx, "/main.Orchestrator/Status", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -241,14 +243,34 @@ func (c *orchestratorClient) Ping(ctx context.Context, in *Trigger, opts ...grpc
 	return out, nil
 }
 
+func (c *orchestratorClient) Nodelist(ctx context.Context, in *Trigger, opts ...grpc.CallOption) (*NodeList, error) {
+	out := new(NodeList)
+	err := c.cc.Invoke(ctx, "/main.Orchestrator/Nodelist", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *orchestratorClient) Command(ctx context.Context, in *ControlCommand, opts ...grpc.CallOption) (*Acknowledge, error) {
+	out := new(Acknowledge)
+	err := c.cc.Invoke(ctx, "/main.Orchestrator/Command", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // OrchestratorServer is the server API for Orchestrator service.
 // All implementations must embed UnimplementedOrchestratorServer
 // for forward compatibility
 type OrchestratorServer interface {
-	Status(context.Context, *Trigger) (*MeshStatus, error)
+	Status(context.Context, *Trigger) (*MeshOrchStatus, error)
 	Connection(context.Context, *Trigger) (*Acknowledge, error)
 	Observe(*Trigger, Orchestrator_ObserveServer) error
 	Ping(context.Context, *Trigger) (*Acknowledge, error)
+	Nodelist(context.Context, *Trigger) (*NodeList, error)
+	Command(context.Context, *ControlCommand) (*Acknowledge, error)
 	mustEmbedUnimplementedOrchestratorServer()
 }
 
@@ -256,7 +278,7 @@ type OrchestratorServer interface {
 type UnimplementedOrchestratorServer struct {
 }
 
-func (UnimplementedOrchestratorServer) Status(context.Context, *Trigger) (*MeshStatus, error) {
+func (UnimplementedOrchestratorServer) Status(context.Context, *Trigger) (*MeshOrchStatus, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Status not implemented")
 }
 func (UnimplementedOrchestratorServer) Connection(context.Context, *Trigger) (*Acknowledge, error) {
@@ -267,6 +289,12 @@ func (UnimplementedOrchestratorServer) Observe(*Trigger, Orchestrator_ObserveSer
 }
 func (UnimplementedOrchestratorServer) Ping(context.Context, *Trigger) (*Acknowledge, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Ping not implemented")
+}
+func (UnimplementedOrchestratorServer) Nodelist(context.Context, *Trigger) (*NodeList, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Nodelist not implemented")
+}
+func (UnimplementedOrchestratorServer) Command(context.Context, *ControlCommand) (*Acknowledge, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Command not implemented")
 }
 func (UnimplementedOrchestratorServer) mustEmbedUnimplementedOrchestratorServer() {}
 
@@ -356,6 +384,42 @@ func _Orchestrator_Ping_Handler(srv interface{}, ctx context.Context, dec func(i
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Orchestrator_Nodelist_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Trigger)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OrchestratorServer).Nodelist(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/main.Orchestrator/Nodelist",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OrchestratorServer).Nodelist(ctx, req.(*Trigger))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Orchestrator_Command_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ControlCommand)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OrchestratorServer).Command(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/main.Orchestrator/Command",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OrchestratorServer).Command(ctx, req.(*ControlCommand))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Orchestrator_ServiceDesc is the grpc.ServiceDesc for Orchestrator service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -374,6 +438,14 @@ var Orchestrator_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Ping",
 			Handler:    _Orchestrator_Ping_Handler,
+		},
+		{
+			MethodName: "Nodelist",
+			Handler:    _Orchestrator_Nodelist_Handler,
+		},
+		{
+			MethodName: "Command",
+			Handler:    _Orchestrator_Command_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{

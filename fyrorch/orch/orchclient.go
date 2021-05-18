@@ -83,11 +83,11 @@ func Call_ORCH_Observe(client pb.OrchestratorClient) (pb.Orchestrator_ObserveCli
 
 // A function that calls the 'Status' method of the ORCH server over a gRPC connection.
 // Requires the ORCH client object and returns a MeshStatus object.
-func Call_ORCH_Status(client pb.OrchestratorClient) (*pb.MeshStatus, error) {
+func Call_ORCH_Status(client pb.OrchestratorClient) (*pb.MeshOrchStatus, error) {
 	// Call the Status method with an arbitrary message
 	meshstatus, err := client.Status(context.Background(), &pb.Trigger{Triggermessage: "status-request"})
 	if err != nil {
-		return &pb.MeshStatus{}, fmt.Errorf("call to ORCH Status runtime failed - %v", err)
+		return &pb.MeshOrchStatus{}, fmt.Errorf("call to ORCH Status runtime failed - %v", err)
 	}
 
 	// Return the mesh status as a MeshStatus object.
