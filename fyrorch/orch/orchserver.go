@@ -16,9 +16,10 @@ import (
 	"fmt"
 	"net"
 
+	"google.golang.org/grpc"
+
 	pb "github.com/fyrwatch/fyrmesh/proto"
 	tools "github.com/fyrwatch/fyrmesh/tools"
-	"google.golang.org/grpc"
 )
 
 // A struct that defines the Orchestrator gRPC Server
@@ -27,8 +28,8 @@ type OrchestratorServer struct {
 	meshconnected  bool
 	meshidentifier string
 	commandqueue   chan map[string]string
-	observerqueue  chan string
-	logqueue       chan string
+	observerqueue  chan tools.ObserverLog
+	logqueue       chan tools.Log
 }
 
 // A function that implements the 'Connection' method of the Orchestrator service.
@@ -74,19 +75,22 @@ func (server *OrchestratorServer) Observe(trigger *pb.Trigger, stream pb.Orchest
 	}
 
 	// Send the signal to enable the observer queue for the log handler.
-	server.logqueue <- "enable-observe"
+	obstoggle := tools.NewObsCommand("enable-observe")
+	server.logqueue <- obstoggle
 
 	// Iterate over the observer channel
 	for log := range server.observerqueue {
 		// Send each log recieved on the channel to the stream.
-		err := stream.Send(&pb.SimpleLog{Message: log})
+		err := stream.Send(&pb.SimpleLog{Message: log.Logmessage})
 		if err != nil {
 			return err
 		}
 	}
 
 	// Send the signal to disable the observer queue for the log handler.
-	server.logqueue <- "disable-observe"
+	obstoggle = tools.NewObsCommand("disable-observe")
+	server.logqueue <- obstoggle
+
 	return nil
 }
 
@@ -129,7 +133,7 @@ func (server *OrchestratorServer) Ping(ctx context.Context, trigger *pb.Trigger)
 // A function that handles the output of the commands recieved over a given command queue
 // by passing each recieved command to function that calls the the 'Write' method of the
 // interface LINK server. Iterates infinitely until the commandqueue is closed.
-func pushcommands(linkclient pb.InterfaceClient, logqueue chan string, commandqueue chan map[string]string) {
+func pushcommands(linkclient pb.InterfaceClient, logqueue chan tools.Log, commandqueue chan map[string]string) {
 	for command := range commandqueue {
 		Call_LINK_Write(linkclient, logqueue, command)
 	}
@@ -138,7 +142,7 @@ func pushcommands(linkclient pb.InterfaceClient, logqueue chan string, commandqu
 // A function that creates the gRPC server for the Orchestrator ORCH service
 // and sets it to listen on the appropriate port. Starts a go routine to check
 // the server's command queue
-func Start_ORCH_Server(linkclient pb.InterfaceClient, logqueue chan string, commandqueue chan map[string]string, obsqueue chan string) error {
+func Start_ORCH_Server(linkclient pb.InterfaceClient, logqueue chan tools.Log, commandqueue chan map[string]string, obsqueue chan tools.ObserverLog) error {
 	// Read the config file
 	config, err := tools.ReadConfig()
 	if err != nil {

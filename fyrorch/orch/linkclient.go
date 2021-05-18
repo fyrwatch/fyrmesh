@@ -49,19 +49,20 @@ func GRPCconnect_LINK() (*pb.InterfaceClient, *grpc.ClientConn, error) {
 
 // A function that calls the 'Write' method of the LINK server over a gRPC connection.
 // Requires the LINK client object, a logqueue channel and the string command to send.
-func Call_LINK_Write(client pb.InterfaceClient, logqueue chan string, command map[string]string) {
+func Call_LINK_Write(client pb.InterfaceClient, logqueue chan tools.Log, command map[string]string) {
 	commandmessage := command["command"]
 	delete(command, "command")
 
 	// Send a string command to the Interface LINK server and get the acknowledgment
 	acknowledge, err := client.Write(context.Background(), &pb.ControlCommand{Command: commandmessage, Metadata: command})
 
-	// Check for errors and construct appropriate logmessage
-	var logmessage string
+	// Check for errors and construct appropriate protolog
+	var logmessage *tools.OrchLog
 	if err != nil {
-		logmessage = tools.GenerateORCHLog(fmt.Sprintf("LINK Write runtime failed - %v", err))
+		logmessage = tools.NewOrchProtolog("method call failed.", "LINK", "Write", err)
 	} else {
-		logmessage = tools.GenerateORCHLog(fmt.Sprintf("LINK Write runtime complete. command-'%v'. success-%v. ", command, acknowledge.GetSuccess()))
+		msg := fmt.Sprintf("method call complete. command-%v. success-%v", command, acknowledge.GetSuccess())
+		logmessage = tools.NewOrchProtolog(msg, "LINK", "Write", fmt.Errorf("%v", acknowledge.GetError()))
 	}
 
 	// Send logmessage onto the logqueue channel
@@ -71,19 +72,19 @@ func Call_LINK_Write(client pb.InterfaceClient, logqueue chan string, command ma
 // A function that calls the 'Read' method of the LINK server over a gRPC connection.
 // Requires the LINK client object and a logqueue channel. InterfaceLogs recieved from
 // LINK server will continously parsed and passed into the logqueue channel to be handled.
-func Call_LINK_Read(client pb.InterfaceClient, logqueue chan string) {
+func Call_LINK_Read(client pb.InterfaceClient, logqueue chan tools.Log) {
 	// Call the 'Read' method of the LINK client with the appropriate trigger message
 	stream, err := client.Read(context.Background(), &pb.Trigger{Triggermessage: "start-stream-read"})
 	if err != nil {
-		// Check for an error and push the log into the channel
-		logmessage := tools.GenerateORCHLog(fmt.Sprintf("LINK Read runtime failed - %v", err))
+		// Check for an error and push the protolog into the channel
+		logmessage := tools.NewOrchProtolog("method call failed.", "LINK", "Read", err)
 		logqueue <- logmessage
 	}
 
 	// Start an infinite loop to read from the stream
 	for {
 		// Recieve an InterfaceLog object from the stream
-		interfacelog, err := stream.Recv()
+		complexlog, err := stream.Recv()
 
 		// Break out of loop if stream has closed
 		if err == io.EOF {
@@ -93,13 +94,13 @@ func Call_LINK_Read(client pb.InterfaceClient, logqueue chan string) {
 		// Push to logqueue if any other error occurs and break from loop.
 		if err != nil {
 			errstatus, _ := status.FromError(err)
-			logmessage := tools.GenerateORCHLog(fmt.Sprintf("LINK Read runtime failed. Error while streaming - (%v)%v", errstatus.Code(), errstatus.Message()))
+			errmsg := fmt.Errorf("StreamError - (%v)%v", errstatus.Code(), errstatus.Message())
+			logmessage := tools.NewOrchProtolog("method runtime failed while streaming", "LINK", "Read", errmsg)
 			logqueue <- logmessage
 			break
 		}
 
-		// Push the InterfaceLog into the logqueue after parsing it.
-		logmessage := tools.GenerateLINKLog(interfacelog.GetLogsource(), interfacelog.GetLogtime(), interfacelog.GetLogmessage())
-		logqueue <- logmessage
+		// Push the ComplexLog from the LINK into the logqueue.
+		logqueue <- complexlog
 	}
 }

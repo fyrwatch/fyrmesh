@@ -13,6 +13,7 @@ package tools
 
 import (
 	"fmt"
+	"strings"
 	"time"
 )
 
@@ -21,47 +22,347 @@ func currenttimeISO() string {
 	return time.Now().Format("2006-01-02T15:04:05")
 }
 
-// A function that returns the parsed ORCH log string. Accepts a message,
-// generates the time and constructs the log with the source always set to ORCH.
-func GenerateORCHLog(message string) string {
-	return fmt.Sprintf("[ORCH][%v] %v", currenttimeISO(), message)
+// A function that deserializes a a string with a format akin
+// to 'key1-value1=key2-value2..' into a map[string]string """
+func deepdeserialize(str string) map[string]string {
+	// Split the string into individual key-value pairs
+	pairs := strings.Split(str, "=")
+	// Define a new map[string]string oject
+	dict := make(map[string]string)
+
+	// Iterate over the key-value pairs
+	for _, pair := range pairs {
+		// Split each key-value pair
+		set := strings.Split(pair, "-")
+		// Add the key value pair into the map
+		dict[set[0]] = set[1]
+	}
+
+	// Return the map
+	return dict
 }
 
-// A function that returns the parsed LINK log string. Accepts a
-// source, time and message and constructs the log accordingly.
-func GenerateLINKLog(source string, logtime string, message string) string {
-	return fmt.Sprintf("[%v][%v] %v", source, logtime, message)
+// A struct that defines a log that is
+// generated within the orchestrator.
+type OrchLog struct {
+	Logsource   string
+	Logtype     string
+	Logtime     string
+	Logmessage  string
+	Logmetadata map[string]string
+}
+
+// A struct that defines a log that is
+// sent out of the server for observation.
+// The Logmessage here is a fully stringified Log.
+// The Logsource and Logtype are used for filtering.
+type ObserverLog struct {
+	Logsource  string
+	Logtype    string
+	Logmessage string
+}
+
+// An interface that defines a common interface that
+// can be used by OrchLog and the ComplexLog proto
+type Log interface {
+	GetLogsource() string
+	GetLogtype() string
+	GetLogtime() string
+	GetLogmessage() string
+	GetLogmetadata() map[string]string
+}
+
+// A getter function for the Logsource field of OrchLog
+func (orchlog *OrchLog) GetLogsource() string {
+	if orchlog != nil {
+		return orchlog.Logsource
+	}
+	return ""
+}
+
+// A getter function for the Logtype field of OrchLog
+func (orchlog *OrchLog) GetLogtype() string {
+	if orchlog != nil {
+		return orchlog.Logtype
+	}
+	return ""
+}
+
+// A getter function for the Logtime field of OrchLog
+func (orchlog *OrchLog) GetLogtime() string {
+	if orchlog != nil {
+		return orchlog.Logtime
+	}
+	return ""
+}
+
+// A getter function for the Logmessage field of OrchLog
+func (orchlog *OrchLog) GetLogmessage() string {
+	if orchlog != nil {
+		return orchlog.Logmessage
+	}
+	return ""
+}
+
+// A getter function for the Logmetadata field of OrchLog
+func (orchlog *OrchLog) GetLogmetadata() map[string]string {
+	if orchlog != nil {
+		return orchlog.Logmetadata
+	}
+	return nil
+}
+
+// A constructor function that generates and returns an OrchLog with
+// the 'serverlog' type. The message passed is set as the Logmessage.
+func NewOrchServerlog(message string) *OrchLog {
+	// Construct a new OrchLog
+	orchlog := OrchLog{}
+	// Set the values of the OrchLog
+	orchlog.Logmessage = "ORCH"
+	orchlog.Logtype = "serverlog"
+	orchlog.Logtime = currenttimeISO()
+	orchlog.Logmessage = message
+	orchlog.Logmetadata = make(map[string]string)
+	// Return the OrchLog
+	return &orchlog
+}
+
+// A constructor function that generates and returns an OrchLog with the
+// 'protolog' type. The message passed is set as the Logmessage and the
+// server, service and err values are set in the Logmetadata map.
+func NewOrchProtolog(message string, server string, service string, err error) *OrchLog {
+	// Construct a new OrchLog
+	orchlog := OrchLog{}
+	// Set the values of the OrchLog
+	orchlog.Logmessage = "ORCH"
+	orchlog.Logtype = "protolog"
+	orchlog.Logtime = currenttimeISO()
+	orchlog.Logmessage = message
+	orchlog.Logmetadata = make(map[string]string)
+	// Set the values of the OrchLog Metadata
+	orchlog.Logmetadata["server"] = server
+	orchlog.Logmetadata["service"] = service
+	orchlog.Logmetadata["error"] = fmt.Sprintf("%v", err)
+	// Return the OrchLog
+	return &orchlog
+}
+
+// A constructor function that generates and returns an OrchLog with
+// the 'cloudlog' type. The message passed is set as the Logmessage.
+func NewOrchCloudlog(message string) *OrchLog {
+	// Construct a new OrchLog
+	orchlog := OrchLog{}
+	// Set the values of the OrchLog
+	orchlog.Logmessage = "ORCH"
+	orchlog.Logtype = "cloudlog"
+	orchlog.Logtime = currenttimeISO()
+	orchlog.Logmessage = message
+	orchlog.Logmetadata = make(map[string]string)
+	// Return the OrchLog
+	return &orchlog
+}
+
+// A constructor function that generates and returns an OrchLog with
+// the 'schedlog' type. The message passed is set as the Logmessage.
+func NewOrchSchedlog(message string) *OrchLog {
+	// Construct a new OrchLog
+	orchlog := OrchLog{}
+	// Set the values of the OrchLog
+	orchlog.Logmessage = "ORCH"
+	orchlog.Logtype = "schedlog"
+	orchlog.Logtime = currenttimeISO()
+	orchlog.Logmessage = message
+	orchlog.Logmetadata = make(map[string]string)
+	// Return the OrchLog
+	return &orchlog
+}
+
+// A constructor function that generates and returns an OrchLog with
+// the 'obstoggle' type. The command passed is set as the Logmessage.
+func NewObsCommand(command string) *OrchLog {
+	// Construct a new OrchLog
+	orchlog := OrchLog{}
+	// Set the values of the OrchLog
+	orchlog.Logmessage = "OBS"
+	orchlog.Logtype = "observertoggle"
+	orchlog.Logtime = currenttimeISO()
+	orchlog.Logmessage = command
+	orchlog.Logmetadata = make(map[string]string)
+	// Return the OrchLog
+	return &orchlog
+}
+
+// A constructore function that generates and returns an ObserverLog that is
+// built using an existing Log. The Logmessage is a stringified version of the
+// Log object being used. The Logsource and Logtype are taken from the Log struct.
+func NewObserverLog(log Log) *ObserverLog {
+	// Construct a new ObserverLog
+	obslog := ObserverLog{}
+	// Set the value of Logsource and Logtype
+	obslog.Logsource = log.GetLogsource()
+	obslog.Logtype = log.GetLogtype()
+	// Stringify and set the Logmessage
+	obslog.Logmessage = StringifyLog(log)
+	// Return the ObserverLog
+	return &obslog
+}
+
+// A function that simplifies and formats a Log into a string.
+// Every logtype has a different format but the general structure
+// of the string log is - '[source][time][type] message. metadata..'
+func StringifyLog(log Log) string {
+	// Retrieve all the Log data
+	logsource := log.GetLogsource()
+	logtype := log.GetLogtype()
+	logtime := log.GetLogtime()
+	logmessage := log.GetLogmessage()
+	logmetadata := log.GetLogmetadata()
+
+	// Declare a string log
+	var strlog string
+	// Define the common prefix of all logs
+	logprefix := fmt.Sprintf("[%v][%v][%v]", logsource, logtime, logtype)
+
+	// Check the logtype and set the appropriate format
+	switch logtype {
+	case "serverlog":
+		strlog = fmt.Sprintf("%v %v", logprefix, logmessage)
+
+	case "protolog":
+		strlog = fmt.Sprintf("%v (%v-%v) %v. error - %v", logprefix, logmetadata["server"], logmetadata["service"], logmessage, logmetadata["error"])
+
+	case "cloudlog":
+		strlog = fmt.Sprintf("%v %v", logprefix, logmessage)
+
+	case "schedlog":
+		strlog = fmt.Sprintf("%v %v", logprefix, logmessage)
+
+	case "message":
+		strlog = fmt.Sprintf("%v (%v-%v) %v", logprefix, logmetadata["format"], logmetadata["type"], logmessage)
+
+	case "newconnection":
+		strlog = fmt.Sprintf("%v %v. node - %v", logprefix, logmessage, logmetadata["node"])
+
+	case "changedconnection":
+		strlog = fmt.Sprintf("%v %v", logprefix, logmessage)
+
+	case "nodetimeadjust":
+		strlog = fmt.Sprintf("%v %v. offset - %v", logprefix, logmessage, logmetadata["offset"])
+
+	case "handshake":
+		strlog = fmt.Sprintf("%v %v. node - %v", logprefix, logmessage, logmetadata["node"])
+
+	case "sensordata":
+		strlog = fmt.Sprintf("%v %v. node - %v. ping - %v", logprefix, logmessage, logmetadata["node"], logmetadata["ping"])
+
+	case "configdata":
+		strlog = fmt.Sprintf("%v %v. node - %v. ping - %v", logprefix, logmessage, logmetadata["node"], logmetadata["ping"])
+
+	case "controlconfig":
+		strlog = fmt.Sprintf("%v %v. node - %v.", logprefix, logmessage, logmetadata["nodeID"])
+
+	case "nodelist":
+		strlog = fmt.Sprintf("%v %v", logprefix, logmessage)
+	}
+
+	// Return the string log
+	return strlog
 }
 
 // A function that handles the output of the logs recieved
 // over a given logqueue. Currently only prints to stdout.
-func LogHandler(logqueue chan string, observerqueue chan string) {
+func LogHandler(logqueue chan Log, observerqueue chan ObserverLog) {
 	// Declare the observer toggle
 	observertoggle := false
 
 	// Iterate over the logqueue until it closes.
 	for log := range logqueue {
 
-		// Check the logqueue for potential command codes
-		switch log {
-		case "enable-observe":
-			// Enable the observerqueue
-			observertoggle = true
-			fmt.Printf("[LOG][%v] Observer Queue has been enabled.\n", currenttimeISO())
-
-		case "disable-observe":
-			// Disable the observerqueue
-			observertoggle = false
-			fmt.Printf("[LOG][%v] Observer Queue has been disabled.\n", currenttimeISO())
-
-		default:
-			// Regularly print the log to console.
-			fmt.Println(log)
-
-			// Check the toggle
+		// Check the source of the log
+		logtype := log.GetLogtype()
+		switch logtype {
+		case "serverlog", "protolog", "cloudlog", "schedlog", "message", "nodetimeadjust", "handshake":
+			// Stringify and print
+			fmt.Println(StringifyLog(log))
+			// Send into observer queue if toggle is set
 			if observertoggle {
-				// Pass every log into the observerqueue channel
-				observerqueue <- log
+				observerqueue <- *NewObserverLog(log)
+			}
+
+		case "newconnection", "changedconnection":
+			// TODO: send command to update nodelist
+
+			// Stringify and print
+			fmt.Println(StringifyLog(log))
+			// Send into observer queue if toggle is set
+			if observertoggle {
+				observerqueue <- *NewObserverLog(log)
+			}
+
+		case "sensordata":
+			// TODO: send to ping collector
+			metadata := log.GetLogmetadata()
+			sensordata := deepdeserialize(metadata["sensors"])
+			// Temporary usage
+			fmt.Printf("sensor data - %v", sensordata)
+
+			// Stringify and print
+			fmt.Println(StringifyLog(log))
+			// Send into observer queue if toggle is set
+			if observertoggle {
+				observerqueue <- *NewObserverLog(log)
+			}
+
+		case "configdata":
+			// TODO: update node config
+
+			// Stringify and print
+			fmt.Println(StringifyLog(log))
+			// Send into observer queue if toggle is set
+			if observertoggle {
+				observerqueue <- *NewObserverLog(log)
+			}
+
+		case "controlconfig":
+			// TODO: update server control node config
+
+			// Stringify and print
+			fmt.Println(StringifyLog(log))
+			// Send into observer queue if toggle is set
+			if observertoggle {
+				observerqueue <- *NewObserverLog(log)
+			}
+
+		case "nodelist":
+			// TODO: update server nodelist
+
+			// Stringify and print
+			fmt.Println(StringifyLog(log))
+			// Send into observer queue if toggle is set
+			if observertoggle {
+				observerqueue <- *NewObserverLog(log)
+			}
+
+		case "observertoggle":
+			// Check the toggle command
+			observertogglecommand := log.GetLogmessage()
+			switch observertogglecommand {
+			case "enable-observe":
+				// Enable the observerqueue
+				observertoggle = true
+
+				// Generate a server log
+				log := NewOrchServerlog("observer queue has been enabled")
+				// Stringify and print
+				fmt.Println(StringifyLog(log))
+
+			case "disable-observe":
+				// Disable the observerqueue
+				observertoggle = false
+				// Generate a server log
+				log := NewOrchServerlog("observer queue has been disabled")
+				// Stringify and print
+				fmt.Println(StringifyLog(log))
 			}
 		}
 	}
