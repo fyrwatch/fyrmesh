@@ -63,8 +63,12 @@ func Call_ORCH_Connection(client pb.OrchestratorClient, value bool) (bool, error
 	// Check for errors and return the appropriate acknowledgement and error if any.
 	if err != nil {
 		return false, fmt.Errorf("call to ORCH Connection runtime failed - %v", err)
+	}
+
+	if success := acknowledge.GetSuccess(); success {
+		return true, nil
 	} else {
-		return acknowledge.GetSuccess(), nil
+		return false, fmt.Errorf("call to ORCH Connection returned a false acknowledge - %v", acknowledge.GetError())
 	}
 }
 
@@ -103,7 +107,30 @@ func Call_ORCH_Ping(client pb.OrchestratorClient) (bool, error) {
 	// Check for errors and return the appropriate acknowledgement and error if any.
 	if err != nil {
 		return false, fmt.Errorf("call to ORCH Ping runtime failed - %v", err)
+	}
+
+	if success := acknowledge.GetSuccess(); success {
+		return true, nil
 	} else {
-		return acknowledge.GetSuccess(), nil
+		return false, fmt.Errorf("call to ORCH Ping returned a false acknowledge - %v", acknowledge.GetError())
+	}
+}
+
+func Call_ORCH_Command(client pb.OrchestratorClient, command map[string]string) (bool, error) {
+	commandmessage := command["command"]
+	delete(command, "command")
+
+	// Call the Command method with the ControlCommand proto
+	acknowledge, err := client.Command(context.Background(), &pb.ControlCommand{Command: commandmessage, Metadata: command})
+
+	// Check for errors and return the appropriate acknowledgement and error if any.
+	if err != nil {
+		return false, fmt.Errorf("call to ORCH Command runtime failed - %v", err)
+	}
+
+	if success := acknowledge.GetSuccess(); success {
+		return true, nil
+	} else {
+		return false, fmt.Errorf("call to ORCH Command returned a false acknowledge - %v", acknowledge.GetError())
 	}
 }

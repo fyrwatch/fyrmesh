@@ -27,7 +27,7 @@ var cfgFile string
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   "FyrCLI",
+	Use:   "fyrcli",
 	Short: "A CLI Application to interact with the FyrMesh API",
 	Long:  `A CLI Application to interact with the FyrMesh API. Powered by Cobra CLI, Golang and gRPC.`,
 	// Uncomment the following line if your bare application

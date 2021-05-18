@@ -131,6 +131,26 @@ func (server *OrchestratorServer) Ping(ctx context.Context, trigger *pb.Trigger)
 	return &pb.Acknowledge{Success: true, Error: "nil"}, nil
 }
 
+// A function that implements the 'Command' method of the Orchestrator service.
+// Accepts a ControlCommand and returns an Acknowledge
+func (server *OrchestratorServer) Command(ctx context.Context, controlcommand *pb.ControlCommand) (*pb.Acknowledge, error) {
+	// Retrieve the command message and metadata from the ControlCommand object
+	commandmessage := controlcommand.GetCommand()
+	commandmetadata := controlcommand.GetMetadata()
+
+	// Set the command message as the 'command' key in a new map
+	command := map[string]string{"command": commandmessage}
+	// Collect the metadata values into the same command map
+	for key, value := range commandmetadata {
+		command[key] = value
+	}
+
+	// Send the command over the CommandQueue
+	server.meshorchestrator.CommandQueue <- command
+	// Return an success Acknowledge with no error
+	return &pb.Acknowledge{Success: true, Error: "nil"}, nil
+}
+
 // A function that handles the output of the commands recieved over a given command queue
 // by passing each recieved command to function that calls the the 'Write' method of the
 // interface LINK server. Iterates infinitely until the commandqueue is closed.
