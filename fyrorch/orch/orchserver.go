@@ -151,6 +151,13 @@ func (server *OrchestratorServer) Command(ctx context.Context, controlcommand *p
 	return &pb.Acknowledge{Success: true, Error: "nil"}, nil
 }
 
+// A function that implements the 'Nodelist' method of the Orchestrator service.
+// Accepts a Trigger and returns a NodeList.
+func (server *OrchestratorServer) Nodelist(ctx context.Context, trigger *pb.Trigger) (*pb.NodeList, error) {
+	// Return the list of nodes currently on the mesh as a NodeList proto
+	return &pb.NodeList{NodeIDs: server.meshorchestrator.NodeIDlist}, nil
+}
+
 // A function that handles the output of the commands recieved over a given command queue
 // by passing each recieved command to function that calls the the 'Write' method of the
 // interface LINK server. Iterates infinitely until the commandqueue is closed.

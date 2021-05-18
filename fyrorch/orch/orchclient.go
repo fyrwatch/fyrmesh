@@ -116,6 +116,8 @@ func Call_ORCH_Ping(client pb.OrchestratorClient) (bool, error) {
 	}
 }
 
+// A function that calls the 'Command' method of the ORCH server over a gRPC connection.
+// Requires the ORCH client object and a command map and returns a boolean success acknowledgment.
 func Call_ORCH_Command(client pb.OrchestratorClient, command map[string]string) (bool, error) {
 	commandmessage := command["command"]
 	delete(command, "command")
@@ -133,4 +135,20 @@ func Call_ORCH_Command(client pb.OrchestratorClient, command map[string]string) 
 	} else {
 		return false, fmt.Errorf("call to ORCH Command returned a false acknowledge - %v", acknowledge.GetError())
 	}
+}
+
+// A function that calls the 'Nodelist' method of the ORCH server over a gRPC connection.
+// Requires the ORCH client and returns a slice of int64.
+func Call_ORCH_Nodelist(client pb.OrchestratorClient) ([]int64, error) {
+	// Call the Nodelist method with the Trigger proto
+	nodelist, err := client.Nodelist(context.Background(), &pb.Trigger{Triggermessage: "nodelist-request"})
+
+	// Check for errors and return the appropriate acknowledgement and error if any.
+	if err != nil {
+		return nil, fmt.Errorf("call to ORCH Nodelist runtime failed - %v", err)
+	}
+
+	// Obtain the slice of node IDs and return it.
+	nodeIDs := nodelist.GetNodeIDs()
+	return nodeIDs, nil
 }

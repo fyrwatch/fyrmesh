@@ -34,13 +34,13 @@ is currently set as being connected to the controller (meshconnected).`,
 		client, conn, err := orch.GRPCconnect_ORCH()
 		defer conn.Close()
 		if err != nil {
-			fmt.Printf("Connection to ORCH gRPC server could not be established - %v\n", err)
+			fmt.Printf("[error] connection to ORCH gRPC server could not be established - %v\n", err)
 		}
 
 		// Call the Status method.
 		meshstatus, err := orch.Call_ORCH_Status(*client)
 		if err != nil {
-			fmt.Printf("Call to read mesh status failed -%v", err)
+			fmt.Printf("[error] call to read mesh status failed -%v", err)
 		}
 
 		// Print the mesh status values.
