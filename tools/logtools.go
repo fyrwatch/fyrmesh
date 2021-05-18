@@ -118,7 +118,7 @@ func NewOrchServerlog(message string) *OrchLog {
 	// Construct a new OrchLog
 	orchlog := OrchLog{}
 	// Set the values of the OrchLog
-	orchlog.Logmessage = "ORCH"
+	orchlog.Logsource = "ORCH"
 	orchlog.Logtype = "serverlog"
 	orchlog.Logtime = currenttimeISO()
 	orchlog.Logmessage = message
@@ -134,7 +134,7 @@ func NewOrchProtolog(message string, server string, service string, err error) *
 	// Construct a new OrchLog
 	orchlog := OrchLog{}
 	// Set the values of the OrchLog
-	orchlog.Logmessage = "ORCH"
+	orchlog.Logsource = "ORCH"
 	orchlog.Logtype = "protolog"
 	orchlog.Logtime = currenttimeISO()
 	orchlog.Logmessage = message
@@ -153,7 +153,7 @@ func NewOrchCloudlog(message string) *OrchLog {
 	// Construct a new OrchLog
 	orchlog := OrchLog{}
 	// Set the values of the OrchLog
-	orchlog.Logmessage = "ORCH"
+	orchlog.Logsource = "ORCH"
 	orchlog.Logtype = "cloudlog"
 	orchlog.Logtime = currenttimeISO()
 	orchlog.Logmessage = message
@@ -168,7 +168,7 @@ func NewOrchSchedlog(message string) *OrchLog {
 	// Construct a new OrchLog
 	orchlog := OrchLog{}
 	// Set the values of the OrchLog
-	orchlog.Logmessage = "ORCH"
+	orchlog.Logsource = "ORCH"
 	orchlog.Logtype = "schedlog"
 	orchlog.Logtime = currenttimeISO()
 	orchlog.Logmessage = message
@@ -183,7 +183,7 @@ func NewObsCommand(command string) *OrchLog {
 	// Construct a new OrchLog
 	orchlog := OrchLog{}
 	// Set the values of the OrchLog
-	orchlog.Logmessage = "OBS"
+	orchlog.Logsource = "OBS"
 	orchlog.Logtype = "observertoggle"
 	orchlog.Logtime = currenttimeISO()
 	orchlog.Logmessage = command
@@ -304,7 +304,7 @@ func LogHandler(logqueue chan Log, observerqueue chan ObserverLog) {
 			metadata := log.GetLogmetadata()
 			sensordata := deepdeserialize(metadata["sensors"])
 			// Temporary usage
-			fmt.Printf("sensor data - %v", sensordata)
+			fmt.Printf("sensor data - %v\n", sensordata)
 
 			// Stringify and print
 			fmt.Println(StringifyLog(log))
