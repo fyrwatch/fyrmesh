@@ -23,9 +23,10 @@ import (
 
 // A struct that defines the configuration of the FyrMesh service
 type Config struct {
-	DeviceID   string                   `json:"deviceID"`
-	DeviceType string                   `json:"deviceType"`
-	Services   map[string]ServiceConfig `json:"services"`
+	DeviceID          string                   `json:"deviceID"`
+	DeviceType        string                   `json:"deviceType"`
+	Services          map[string]ServiceConfig `json:"services"`
+	SchedulerPingRate int                      `json:"pingrate"`
 }
 
 // A struct that defines the configuration of an individual
@@ -140,6 +141,7 @@ func GenerateConfig() error {
 			"ORCH": {Host: "localhost", Port: 50001},
 			"LINK": {Host: "localhost", Port: 50000},
 		},
+		SchedulerPingRate: 10,
 	}
 
 	// Test the runtime environment and generate device values.

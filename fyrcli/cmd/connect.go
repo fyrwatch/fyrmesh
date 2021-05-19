@@ -41,7 +41,7 @@ while also serving as a way to indicate that the CLI is currently communicating 
 		client, conn, err := orch.GRPCconnect_ORCH()
 		defer conn.Close()
 		if err != nil {
-			fmt.Printf("Connection to ORCH gRPC server could not be established - %v\n", err)
+			fmt.Printf("[error] connection to ORCH gRPC server could not be established - %v\n", err)
 		}
 
 		// Check the value of the connection state
@@ -51,9 +51,9 @@ while also serving as a way to indicate that the CLI is currently communicating 
 			success, err := orch.Call_ORCH_Connection(*client, true)
 			// Check the acknowledgment and print the appropriate message.
 			if success {
-				fmt.Printf("Connection status successfully set to 'true'\n")
+				fmt.Printf("[success] connection status successfully set to 'true'\n")
 			} else {
-				fmt.Printf("Connection status failed to be set - %v\n", err)
+				fmt.Printf("[failure] connection status failed to be set - %v\n", err)
 			}
 
 		case "off", "false", "disconnect", "no":
@@ -61,13 +61,13 @@ while also serving as a way to indicate that the CLI is currently communicating 
 			success, err := orch.Call_ORCH_Connection(*client, false)
 			// Check the acknowledgment and print the appropriate message.
 			if success {
-				fmt.Printf("Connection status successfully set to 'off'\n")
+				fmt.Printf("[success] connection status successfully set to 'off'\n")
 			} else {
-				fmt.Printf("Connection status failed to be set - %v\n", err)
+				fmt.Printf("[failure] connection status failed to be set - %v\n", err)
 			}
 
 		default:
-			fmt.Println("Invalid value used for the 'set' flag!")
+			fmt.Println("[error] invalid value used for the 'set' flag!")
 		}
 	},
 }

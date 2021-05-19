@@ -14,7 +14,6 @@ package cmd
 import (
 	"fmt"
 	"io"
-	"os"
 
 	"github.com/spf13/cobra"
 	"google.golang.org/grpc/status"
@@ -50,13 +49,13 @@ terminal that invokes it. Observer logs have the '[OBS]' suffix followed by the 
 		if err != nil {
 			fmt.Printf("[error] config file could not be read - %v\n", err)
 			fmt.Println("[suggestion] run 'fyrcli config -m generate' if file does not exist or is corrupted.")
-			os.Exit(0)
+			return
 		}
 
 		// Check the device type config value.
 		if config.DeviceType != "mesh-observer" {
 			fmt.Println("[error] log observation can only be performed by a mesh observer.")
-			os.Exit(0)
+			return
 		}
 
 		// Connect to the ORCH gRPC server.

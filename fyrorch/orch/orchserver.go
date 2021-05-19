@@ -220,10 +220,7 @@ func CommandHandler(linkclient pb.InterfaceClient, meshorchestrator *tools.MeshO
 // The interval is defined in the config file as an integer number of seconds.
 // The scheduler waits 15s before starting the pings to give time for the mesh and
 // orchestrator to initialize when the service first starts.
-func Scheduler(meshorchestrator *tools.MeshOrchestrator) {
-	// TODO: read the pingrate from the config
-	pingrate := 10
-
+func Scheduler(meshorchestrator *tools.MeshOrchestrator, pingrate int) {
 	// Sleep for 15s to give time for other orchestrator services to initialize
 	time.Sleep(time.Second * 15)
 	// Log the beginning of the scheduled pinging to the LogQueue
@@ -273,7 +270,7 @@ func Start_ORCH_Server(linkclient pb.InterfaceClient, meshorchestrator *tools.Me
 	go tools.PingHandler(meshorchestrator)
 
 	// Start a go-routine to send scheduled pings to the mesh
-	go Scheduler(meshorchestrator)
+	go Scheduler(meshorchestrator, config.SchedulerPingRate)
 
 	// Call the Initialize method the meshorchestrator to configure the node list and control node fields.
 	meshorchestrator.Initialize()

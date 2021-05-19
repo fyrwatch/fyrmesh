@@ -47,21 +47,21 @@ NOTE: The LINK server should be booted up before the ORCH server to avoid an err
 		// Read the config file.
 		config, err := tools.ReadConfig()
 		if err != nil {
-			fmt.Printf("Config file could not be read - %v\n", err)
-			fmt.Println("Run 'fyrcli config -m generate' if file does not exist or is corrupted.")
-			os.Exit(0)
+			fmt.Printf("[error] config file could not be read - %v\n", err)
+			fmt.Println("[suggestion] run 'fyrcli config -m generate' if file does not exist or is corrupted.")
+			return
 		}
 
 		// Check the device type config value.
 		if config.DeviceType != "mesh-controller" {
-			fmt.Println("Server boot can only be performed on the mesh controller.")
-			os.Exit(0)
+			fmt.Println("[error] server boot can only be performed on the mesh controller.")
+			return
 		}
 
 		// Check if the 'FYRMESHSRC' env variable has been set.
 		if srcdir == "" {
-			fmt.Println("Server boot failed - environment variable 'FYRMESHCONFIG' has not set.")
-			os.Exit(0)
+			fmt.Println("[error] server boot failed - environment variable 'FYRMESHCONFIG' has not set.")
+			return
 		}
 
 		// Check the value of the server name and call the appropriate boot method.
@@ -75,7 +75,7 @@ NOTE: The LINK server should be booted up before the ORCH server to avoid an err
 			bootLINK(srcdir)
 
 		default:
-			fmt.Println("Unsupported server name -", server)
+			fmt.Println("[error] unsupported server name -", server)
 		}
 	},
 }
