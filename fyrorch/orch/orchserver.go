@@ -64,9 +64,14 @@ func (server *OrchestratorServer) Connection(ctx context.Context, trigger *pb.Tr
 func (server *OrchestratorServer) Observe(trigger *pb.Trigger, stream pb.Orchestrator_ObserveServer) error {
 	// Retrieve the stream trigger message from the Message object and check its value.
 	triggermessage := trigger.GetTriggermessage()
+	triggermetadata := trigger.GetMetadata()
+	// Retrieve the observe filters from the Trigger metadata field.
+	typefilter := triggermetadata["type"]
+	sourcefilter := triggermetadata["source"]
+
 	if triggermessage != "start-stream-observe" {
 		// If stream initiation code is invalid. Send one error message over the stream and return.
-		stream.Send(&pb.SimpleLog{Message: "invalid observe stream initiation code"})
+		stream.Send(&pb.SimpleLog{Message: "[OBS] invalid observe stream initiation code"})
 		return nil
 	}
 
@@ -76,10 +81,36 @@ func (server *OrchestratorServer) Observe(trigger *pb.Trigger, stream pb.Orchest
 
 	// Iterate over the observer channel
 	for log := range server.meshorchestrator.ObserverQueue {
-		// Send each log recieved on the channel to the stream.
-		err := stream.Send(&pb.SimpleLog{Message: log.Logmessage})
-		if err != nil {
-			return err
+
+		if sourcefilter == "" && typefilter == "" {
+			// If both filters are not set - send all logs recieved on the channel to the stream.
+			if err := stream.Send(&pb.SimpleLog{Message: log.Logmessage}); err != nil {
+				return err
+			}
+
+		} else if sourcefilter != "" && typefilter == "" {
+			// If only source filter is set - check the source of logs recieved on the channel and send on the stream
+			if log.Logsource == sourcefilter {
+				if err := stream.Send(&pb.SimpleLog{Message: log.Logmessage}); err != nil {
+					return err
+				}
+			}
+
+		} else if sourcefilter == "" && typefilter != "" {
+			// If only type filter is set - check the type of logs recieved on the channel and send on the stream
+			if log.Logsource == typefilter {
+				if err := stream.Send(&pb.SimpleLog{Message: log.Logmessage}); err != nil {
+					return err
+				}
+			}
+
+		} else if sourcefilter != "" && typefilter != "" {
+			// If both filters are set - check the type and source of logs receieved on the channel and send on the stream
+			if log.Logsource == sourcefilter && log.Logtype == typefilter {
+				if err := stream.Send(&pb.SimpleLog{Message: log.Logmessage}); err != nil {
+					return err
+				}
+			}
 		}
 	}
 

@@ -395,7 +395,7 @@ func (meshorchestrator *MeshOrchestrator) UpdateNodelist() {
 	result := checkSliceEquality(oldNodeIDlist, newNodeIDlist)
 	if !result {
 		// If they are not equal, send the command to ping the mesh for config data to the CommandQueue
-		command := map[string]string{"command": "readconfig-mesh"}
+		command := map[string]string{"command": "readconfig-mesh", "ping": "configping-nodelistupdater"}
 		meshorchestrator.CommandQueue <- command
 	}
 }

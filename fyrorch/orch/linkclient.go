@@ -61,7 +61,7 @@ func Call_LINK_Write(client pb.InterfaceClient, logqueue chan tools.Log, command
 	if err != nil {
 		logmessage = tools.NewOrchProtolog("method call failed.", "LINK", "Write", err)
 	} else {
-		msg := fmt.Sprintf("method call complete. command-%v. success-%v", command, acknowledge.GetSuccess())
+		msg := fmt.Sprintf("method call complete. command - %v. success - %v", commandmessage, acknowledge.GetSuccess())
 		logmessage = tools.NewOrchProtolog(msg, "LINK", "Write", fmt.Errorf("%v", acknowledge.GetError()))
 	}
 

@@ -74,9 +74,10 @@ func Call_ORCH_Connection(client pb.OrchestratorClient, value bool) (bool, error
 
 // A function that calls the 'Observe' method of the ORCH server over a gRPC connection.
 // Requires the ORCH client object and returns the stream client for the Observe service.
-func Call_ORCH_Observe(client pb.OrchestratorClient) (pb.Orchestrator_ObserveClient, error) {
-	// Send the valid initiation code as a Message to the Observe method of the ORCH Server
-	stream, err := client.Observe(context.Background(), &pb.Trigger{Triggermessage: "start-stream-observe"})
+func Call_ORCH_Observe(client pb.OrchestratorClient, sourcefilter string, typefilter string) (pb.Orchestrator_ObserveClient, error) {
+	// Send the valid initiation code as a Trigger to the Observe method of the ORCH Server
+	metadata := map[string]string{"source": sourcefilter, "type": typefilter}
+	stream, err := client.Observe(context.Background(), &pb.Trigger{Triggermessage: "start-stream-observe", Metadata: metadata})
 	if err != nil {
 		return nil, fmt.Errorf("call to ORCH Observe runtime failed - %v", err)
 	}

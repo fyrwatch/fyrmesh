@@ -281,7 +281,7 @@ func LogHandler(meshorchestrator *MeshOrchestrator) {
 		// Check the source of the log
 		logtype := log.GetLogtype()
 		switch logtype {
-		case "serverlog", "protolog", "cloudlog", "schedlog", "message", "nodetimeadjust", "handshake":
+		case "serverlog", "protolog", "cloudlog", "schedlog", "message", "nodetimeadjust":
 			// Stringify and print
 			fmt.Println(StringifyLog(log))
 			// Send into observer queue if toggle is set
@@ -289,7 +289,7 @@ func LogHandler(meshorchestrator *MeshOrchestrator) {
 				meshorchestrator.ObserverQueue <- *NewObserverLog(log)
 			}
 
-		case "newconnection", "changedconnection":
+		case "handshake", "newconnection", "changedconnection":
 			// Call the method to update the meshorchestrator's NodeIDlist
 			meshorchestrator.UpdateNodeIDlist()
 
