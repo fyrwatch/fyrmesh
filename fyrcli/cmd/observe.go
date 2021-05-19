@@ -48,7 +48,7 @@ terminal that invokes it. Observer logs have the '[OBS]' suffix followed by the 
 		config, err := tools.ReadConfig()
 		if err != nil {
 			fmt.Printf("[error] config file could not be read - %v\n", err)
-			fmt.Println("[suggestion] run 'fyrcli config -m generate' if file does not exist or is corrupted.")
+			fmt.Println("[suggestion] run 'fyrcli config generate' if file does not exist or is corrupted.")
 			return
 		}
 

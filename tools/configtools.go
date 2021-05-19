@@ -17,6 +17,7 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"runtime"
 	"strings"
 )
@@ -40,14 +41,16 @@ type ServiceConfig struct {
 // in the 'FYRMESHCONFIG' env variable and returns the values in a Config struct.
 func ReadConfig() (Config, error) {
 
-	// Read the 'FYRMESHCONFIG' env var (no need to check if its set because the call to CheckConfig will handle that).
-	filelocation := os.Getenv("FYRMESHCONFIG")
-
 	// Check if the config file exists.
 	check, err := CheckConfig()
 	if !check {
 		return Config{}, fmt.Errorf("config file does not exist - %v", err)
 	}
+
+	// Read the 'FYRMESHCONFIG' env var (no need to check if its set because the call to CheckConfig will have handled that).
+	filedir := os.Getenv("FYRMESHCONFIG")
+	// Construct the path to the config file
+	filelocation := filepath.Join(filedir, "config.json")
 
 	// Open the config file
 	configFile, err := os.Open(filelocation)
@@ -71,9 +74,11 @@ func ReadConfig() (Config, error) {
 // in the 'FYRMESHCONFIG' env variable and returns the confirmation as a boolean.
 func CheckConfig() (bool, error) {
 	// Read the 'FYRMESHCONFIG' env var
-	filelocation := os.Getenv("FYRMESHCONFIG")
+	filedir := os.Getenv("FYRMESHCONFIG")
+	// Construct the path to the config file
+	filelocation := filepath.Join(filedir, "config.json")
 	if filelocation == "" {
-		return false, fmt.Errorf("environment variable 'FYRMESHCONFIG' has not set")
+		return false, fmt.Errorf("environment variable 'FYRMESHCONFIG' has not been set")
 	}
 
 	// Check if the file exists at the location
@@ -93,9 +98,11 @@ func CheckConfig() (bool, error) {
 // located in the path specified by the 'FYRMESHCONFIG' env variable.
 func WriteConfig(config Config) error {
 	// Read the 'FYRMESHCONFIG' env var
-	filelocation := os.Getenv("FYRMESHCONFIG")
+	filedir := os.Getenv("FYRMESHCONFIG")
+	// Construct the path to the config file
+	filelocation := filepath.Join(filedir, "config.json")
 	if filelocation == "" {
-		return fmt.Errorf("environment variable 'FYRMESHCONFIG' has not set")
+		return fmt.Errorf("environment variable 'FYRMESHCONFIG' has not been set")
 	}
 
 	// Format and Indent the config struct provided into a byte array.
@@ -141,7 +148,7 @@ func GenerateConfig() error {
 			"ORCH": {Host: "localhost", Port: 50001},
 			"LINK": {Host: "localhost", Port: 50000},
 		},
-		SchedulerPingRate: 10,
+		SchedulerPingRate: 15,
 	}
 
 	// Test the runtime environment and generate device values.

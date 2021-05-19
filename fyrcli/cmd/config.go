@@ -14,6 +14,7 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 
 	"github.com/spf13/cobra"
 
@@ -25,7 +26,7 @@ var configCmd = &cobra.Command{
 	Use:   "config",
 	Short: "View configuration values of the FyrCLI.",
 	Long: `View configuration values of the FyrCLI which are obtained from a configuration file.
-The path to the configuration file is set in the environment variable 'FYRMESHCONFIG'. `,
+The configuration file is in the directory defined by the environment variable 'FYRMESHCONFIG'. `,
 
 	Run: func(cmd *cobra.Command, args []string) {
 		showconfig()
@@ -43,7 +44,7 @@ var configGenerateCmd = &cobra.Command{
 		check, _ := tools.CheckConfig()
 		if check {
 			// File already exists. Request user confirmation to overwrite.
-			fmt.Println("[prompt] a config file already exists. proceed to overwrite? y/n")
+			fmt.Print("[prompt] a config file already exists. proceed to overwrite? [y/n] > ")
 			// Read the user input.
 			var proceed string
 			fmt.Scanln(&proceed)
@@ -76,8 +77,8 @@ var configGenerateCmd = &cobra.Command{
 			// Config has been generated.
 			fmt.Println("[success] a config file has been generated.")
 			// Print out some other suggested methods for the CLI tool.
-			fmt.Println("[suggestion] -- use 'fyrcli config -m show' to view the configuration values.")
-			fmt.Println("[suggestion] -- use 'fyrcli config -m locate' to view the path to the config file.")
+			fmt.Println("\n[suggestion] -- use 'fyrcli config show' to view the configuration values.")
+			fmt.Println("[suggestion] -- use 'fyrcli config locate' to view the path to the config file.")
 		}
 	},
 }
@@ -86,7 +87,7 @@ var configGenerateCmd = &cobra.Command{
 var configCheckfileCmd = &cobra.Command{
 	Use:   "checkfile",
 	Short: "Confirms the existence of the configuration file.",
-	Long:  `Confirms the existence of the configuration file in path specfied by the 'FYRMESHCONFIG' env variable.`,
+	Long:  `Confirms the existence of the configuration file in directory specfied by the 'FYRMESHCONFIG' env variable.`,
 
 	Run: func(cmd *cobra.Command, args []string) {
 		// Call the method to check if the config file exists.
@@ -95,13 +96,13 @@ var configCheckfileCmd = &cobra.Command{
 			// The file has been confirmed to exist
 			fmt.Println("[true] a configuration file exists")
 			// Print out some other suggested methods for the CLI tool.
-			fmt.Println("[suggestion] -- use 'fyrcli config -m show' to view the configuration values.")
-			fmt.Println("[suggestion] -- use 'fyrcli config -m locate' to view the path to the config file.")
+			fmt.Println("\n[suggestion] -- use 'fyrcli config show' to view the configuration values.")
+			fmt.Println("[suggestion] -- use 'fyrcli config locate' to view the path to the config file.")
 		} else {
 			// The file either does not exist or there is some uncertainty in its existence.
 			fmt.Println("[false] a configuration file does not exist. the file may also be corrupted or inaccesible.", err)
 			// Print out some other suggested methods for the CLI tool.
-			fmt.Println("[suggestion] -- use 'fyrcli config -m generate' to generate a new configuration file.")
+			fmt.Println("\n[suggestion] -- use 'fyrcli config generate' to generate a new configuration file.")
 		}
 	},
 }
@@ -115,10 +116,17 @@ var configLocateCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		// Retrieve the env variable 'FYRMESHCONFIG'.
 		configpath := os.Getenv("FYRMESHCONFIG")
+		// Construct the path to the config file
+		configfilepath := filepath.Join(configpath, "config.json")
+		// Check if the env var has been set
+		if configpath == "" {
+			fmt.Println("[error] environment variable 'FYRMESHCONFIG' has not been set")
+		}
+
 		// Print the value of the env variable.
-		fmt.Println(configpath)
+		fmt.Println(configfilepath)
 		// Print out some other suggested methods for the CLI tool.
-		fmt.Println("[suggestion] -- use 'fyrcli config -m show' to view the configuration values.")
+		fmt.Println("\n[suggestion] -- use 'fyrcli config show' to view the configuration values.")
 	},
 }
 
@@ -275,12 +283,11 @@ func showconfig() {
 	// Read the config file.
 	config, err := tools.ReadConfig()
 	if err != nil {
-		fmt.Println(err)
+		fmt.Printf("[error] %v", err)
 		return
 	}
 
 	// Print out the configuration values in a formatted menu-type list.
-	fmt.Println()
 	fmt.Println("---- FyrMesh Configuration File ----")
 	fmt.Println()
 
@@ -301,11 +308,10 @@ func showconfig() {
 	fmt.Println()
 
 	fmt.Println("---- end of file ----")
-	fmt.Println()
 
 	// Print out some other suggested methods for the CLI tool.
-	fmt.Println("[suggestion] -- use 'fyrcli config -m modify' to modify the configuration values.")
-	fmt.Println("[suggestion] -- use 'fyrcli config -m locate' to view the path to the config file.")
+	fmt.Println("\n[suggestion] -- use 'fyrcli config modify' to modify the configuration values.")
+	fmt.Println("[suggestion] -- use 'fyrcli config locate' to view the path to the config file.")
 }
 
 func init() {
