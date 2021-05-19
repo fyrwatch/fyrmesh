@@ -120,7 +120,8 @@ def grpc_serve():
         sys.exit()
 
     # Read the config file
-    with open(configpath) as configfile:
+    configfilepath = os.path.join(configpath, "config.json")
+    with open(configfilepath) as configfile:
         configdata = json.load(configfile)
 
     # Setup the server listening port and start it.
