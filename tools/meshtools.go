@@ -216,6 +216,9 @@ type MeshOrchestrator struct {
 	// A slice of int that contains the list of all node IDs on the mesh
 	NodeIDlist []int64
 
+	// A map of string keys and MeshPing values. Maps the Pings to their respective pingIDs
+	Accumulation map[string]MeshPing
+
 	// A channel of Logs that is used by all components to communicate between each other and to the console
 	LogQueue chan Log
 
@@ -224,6 +227,9 @@ type MeshOrchestrator struct {
 
 	// A channel of string maps that are used to send commands to the control node
 	CommandQueue chan map[string]string
+
+	// A channel of SensorPings that are used to accumulate MeshPings
+	AccumulatorQueue chan SensorPing
 }
 
 // A constructor function that generates and returns a MeshOrchestrator.
@@ -242,8 +248,10 @@ func NewMeshOrchestrator() (*MeshOrchestrator, error) {
 	meshorchestrator.Controlnode = ControlNode{}
 	// Set the list of node IDs on the mesh to an emtpy slice of int
 	meshorchestrator.NodeIDlist = make([]int64, 0)
-	// Set the list of nodes on the mesh to an empty slice of SensorNode
+	// Set the list of nodes on the mesh to an empty map of int -> SensorNode
 	meshorchestrator.Nodelist = make(map[int64]SensorNode)
+	// Set the list of accumulating pings to an empty map of string -> MeshPing
+	meshorchestrator.Accumulation = make(map[string]MeshPing)
 
 	// Create a log channel that will be used to pass all logs within the server.
 	meshorchestrator.LogQueue = make(chan Log)
@@ -251,6 +259,8 @@ func NewMeshOrchestrator() (*MeshOrchestrator, error) {
 	meshorchestrator.ObserverQueue = make(chan ObserverLog)
 	// Create a command queue that will be passed into the Orchestrator to siphon commands to the LINK.
 	meshorchestrator.CommandQueue = make(chan map[string]string)
+	// Create an accumulator queue that will be passed into the PingHandler to collect pings.
+	meshorchestrator.AccumulatorQueue = make(chan SensorPing)
 
 	// Read the config file
 	meshconfig, err := ReadConfig()
@@ -267,6 +277,7 @@ func NewMeshOrchestrator() (*MeshOrchestrator, error) {
 // A method of MeshOrchestrator that closes all the channels inside it.
 func (meshorchestrator *MeshOrchestrator) Close() {
 	// Close all the channels within the MeshOrchestrator
+	close(meshorchestrator.AccumulatorQueue)
 	close(meshorchestrator.ObserverQueue)
 	close(meshorchestrator.CommandQueue)
 	close(meshorchestrator.LogQueue)
@@ -364,6 +375,35 @@ func (meshorchestrator *MeshOrchestrator) SetNode(log Log) error {
 	return nil
 }
 
+// A method of MeshOrchestator that constructs a SensorPing object from the
+// log and sends it to the AccumulatorQueue if it is not a userping
+func (meshorchestrator *MeshOrchestrator) SetSensorData(log Log) error {
+	// Retrieve the type of the Log
+	logtype := log.GetLogtype()
+	// Check if the logtype is 'controlconfig'
+	if logtype != "sensordata" {
+		return fmt.Errorf("log is not of type 'sensordata'")
+	}
+
+	// Construct a new SensorNode
+	sensorping, err := NewSensorPing(log, meshorchestrator)
+	if err != nil {
+		return fmt.Errorf("sensor ping could not be constructed - %v", err)
+	}
+
+	// userpings are never accumulated
+	userping := strings.HasPrefix(sensorping.PingID, "userping")
+	// only mesh wide pings can be accumulated
+	meshping := strings.HasSuffix(sensorping.PingID, "mesh")
+
+	// Check if sensor ping is not a user ping and is a mesh ping
+	if !userping && meshping {
+		meshorchestrator.AccumulatorQueue <- *sensorping
+	}
+
+	return nil
+}
+
 // A method of MeshOrchestrator that sends the command to
 // retreieve a new copy of the nodelist from the mesh.
 func (meshorchestrator *MeshOrchestrator) UpdateNodeIDlist() {
@@ -395,18 +435,23 @@ func (meshorchestrator *MeshOrchestrator) UpdateNodelist() {
 	result := checkSliceEquality(oldNodeIDlist, newNodeIDlist)
 	if !result {
 		// If they are not equal, send the command to ping the mesh for config data to the CommandQueue
-		command := map[string]string{"command": "readconfig-mesh", "ping": "configping-nodelistupdater"}
+		command := map[string]string{"command": "readconfig-mesh", "ping": fmt.Sprintf("controlping-nodelistupdater-%v-mesh", CurrentISOtime())}
 		meshorchestrator.CommandQueue <- command
 	}
 }
 
+// A method of MeshOrchestrator that returns a simplified nodelist.
+// The simplified nodelist is mapping of the nodeIDs to their config strings.
 func (meshorchestrator *MeshOrchestrator) GetSimpleNodeList() map[int64]string {
+	// Create a null map and retrieve the NodeList from the meshorchestrator
 	simplenodelist := make(map[int64]string)
 	nodelist := meshorchestrator.Nodelist
 
+	// Iterate over the nodelist and accumulate into the simple map
 	for nodeid, node := range nodelist {
 		simplenodelist[nodeid] = node.GetConfigString()
 	}
 
+	// Return the simple nodelist
 	return simplenodelist
 }

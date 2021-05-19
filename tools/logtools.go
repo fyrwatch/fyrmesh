@@ -18,7 +18,7 @@ import (
 )
 
 // A function that returns the current time as an ISO8601 string without the timezone.
-func currenttimeISO() string {
+func CurrentISOtime() string {
 	return time.Now().Format("2006-01-02T15:04:05")
 }
 
@@ -120,7 +120,7 @@ func NewOrchServerlog(message string) *OrchLog {
 	// Set the values of the OrchLog
 	orchlog.Logsource = "ORCH"
 	orchlog.Logtype = "serverlog"
-	orchlog.Logtime = currenttimeISO()
+	orchlog.Logtime = CurrentISOtime()
 	orchlog.Logmessage = message
 	orchlog.Logmetadata = make(map[string]string)
 	// Return the OrchLog
@@ -136,7 +136,7 @@ func NewOrchProtolog(message string, server string, service string, err error) *
 	// Set the values of the OrchLog
 	orchlog.Logsource = "ORCH"
 	orchlog.Logtype = "protolog"
-	orchlog.Logtime = currenttimeISO()
+	orchlog.Logtime = CurrentISOtime()
 	orchlog.Logmessage = message
 	orchlog.Logmetadata = make(map[string]string)
 	// Set the values of the OrchLog Metadata
@@ -155,7 +155,7 @@ func NewOrchCloudlog(message string) *OrchLog {
 	// Set the values of the OrchLog
 	orchlog.Logsource = "ORCH"
 	orchlog.Logtype = "cloudlog"
-	orchlog.Logtime = currenttimeISO()
+	orchlog.Logtime = CurrentISOtime()
 	orchlog.Logmessage = message
 	orchlog.Logmetadata = make(map[string]string)
 	// Return the OrchLog
@@ -170,7 +170,7 @@ func NewOrchSchedlog(message string) *OrchLog {
 	// Set the values of the OrchLog
 	orchlog.Logsource = "ORCH"
 	orchlog.Logtype = "schedlog"
-	orchlog.Logtime = currenttimeISO()
+	orchlog.Logtime = CurrentISOtime()
 	orchlog.Logmessage = message
 	orchlog.Logmetadata = make(map[string]string)
 	// Return the OrchLog
@@ -185,7 +185,7 @@ func NewObsCommand(command string) *OrchLog {
 	// Set the values of the OrchLog
 	orchlog.Logsource = "OBS"
 	orchlog.Logtype = "observertoggle"
-	orchlog.Logtime = currenttimeISO()
+	orchlog.Logtime = CurrentISOtime()
 	orchlog.Logmessage = command
 	orchlog.Logmetadata = make(map[string]string)
 	// Return the OrchLog
@@ -253,7 +253,8 @@ func StringifyLog(log Log) string {
 		strlog = fmt.Sprintf("%v %v. node - %v", logprefix, logmessage, logmetadata["node"])
 
 	case "sensordata":
-		strlog = fmt.Sprintf("%v %v. node - %v. ping - %v", logprefix, logmessage, logmetadata["node"], logmetadata["ping"])
+		sensordata := Deepdeserialize(logmetadata["sensors"])
+		strlog = fmt.Sprintf("%v %v. sensors - %v. node - %v. ping - %v", logprefix, logmessage, sensordata, logmetadata["node"], logmetadata["ping"])
 
 	case "configdata":
 		strlog = fmt.Sprintf("%v %v. node - %v. ping - %v", logprefix, logmessage, logmetadata["node"], logmetadata["ping"])
@@ -301,11 +302,8 @@ func LogHandler(meshorchestrator *MeshOrchestrator) {
 			}
 
 		case "sensordata":
-			// TODO: send to ping collector
-			metadata := log.GetLogmetadata()
-			sensordata := Deepdeserialize(metadata["sensors"])
-			// Temporary usage
-			fmt.Printf("[ORCH][~][~] sensor data - %v\n", sensordata)
+			// Set the sensor node data to be added into the accumulation queue
+			meshorchestrator.SetSensorData(log)
 
 			// Stringify and print
 			fmt.Println(StringifyLog(log))

@@ -15,6 +15,7 @@ import (
 	"context"
 	"fmt"
 	"net"
+	"time"
 
 	"google.golang.org/grpc"
 
@@ -147,27 +148,27 @@ func (server *OrchestratorServer) Ping(ctx context.Context, trigger *pb.Trigger)
 	switch triggermessage {
 	case "ping-sensor-mesh":
 		// Send a command to ping mesh for sensor data to the server's command queue
-		command := map[string]string{"command": "readsensors-mesh", "ping": fmt.Sprintf("userping-%v", triggermetadata["phrase"])}
+		command := map[string]string{"command": "readsensors-mesh", "ping": fmt.Sprintf("userping-%v-mesh", triggermetadata["phrase"])}
 		server.meshorchestrator.CommandQueue <- command
 
 	case "ping-sensor-node":
 		// Send a command to ping a node for sensor data to the server's command queue
-		command := map[string]string{"command": "readsensors-node", "ping": fmt.Sprintf("userping-%v", triggermetadata["phrase"]), "node": triggermetadata["node"]}
+		command := map[string]string{"command": "readsensors-node", "ping": fmt.Sprintf("userping-%v-node", triggermetadata["phrase"]), "node": triggermetadata["node"]}
 		server.meshorchestrator.CommandQueue <- command
 
 	case "ping-config-mesh":
 		// Send a command to ping mesh for config data to the server's command queue
-		command := map[string]string{"command": "readconfig-mesh", "ping": fmt.Sprintf("userping-%v", triggermetadata["phrase"])}
+		command := map[string]string{"command": "readconfig-mesh", "ping": fmt.Sprintf("userping-%v-mesh", triggermetadata["phrase"])}
 		server.meshorchestrator.CommandQueue <- command
 
 	case "ping-config-node":
 		// Send a command to ping a node for config data to the server's command queue
-		command := map[string]string{"command": "readconfig-node", "ping": fmt.Sprintf("userping-%v", triggermetadata["phrase"]), "node": triggermetadata["node"]}
+		command := map[string]string{"command": "readconfig-node", "ping": fmt.Sprintf("userping-%v-node", triggermetadata["phrase"]), "node": triggermetadata["node"]}
 		server.meshorchestrator.CommandQueue <- command
 
 	case "ping-control":
 		// Send a command to ping the control node for config data to the server's command queue
-		command := map[string]string{"command": "readconfig-control", "ping": fmt.Sprintf("userping-%v", triggermetadata["phrase"])}
+		command := map[string]string{"command": "readconfig-control"}
 		server.meshorchestrator.CommandQueue <- command
 
 	default:
@@ -209,9 +210,37 @@ func (server *OrchestratorServer) Nodelist(ctx context.Context, trigger *pb.Trig
 // A function that handles the output of the commands recieved over a given command queue
 // by passing each recieved command to function that calls the the 'Write' method of the
 // interface LINK server. Iterates infinitely until the commandqueue is closed.
-func pushcommands(linkclient pb.InterfaceClient, meshorchestrator *tools.MeshOrchestrator) {
+func CommandHandler(linkclient pb.InterfaceClient, meshorchestrator *tools.MeshOrchestrator) {
 	for command := range meshorchestrator.CommandQueue {
 		Call_LINK_Write(linkclient, meshorchestrator.LogQueue, command)
+	}
+}
+
+// A function that handles the scheduled pinging of the message at a regualar interval
+// The interval is defined in the config file as an integer number of seconds.
+// The scheduler waits 15s before starting the pings to give time for the mesh and
+// orchestrator to initialize when the service first starts.
+func Scheduler(meshorchestrator *tools.MeshOrchestrator) {
+	// TODO: read the pingrate from the config
+	pingrate := 10
+
+	// Sleep for 15s to give time for other orchestrator services to initialize
+	time.Sleep(time.Second * 15)
+	// Log the beginning of the scheduled pinging to the LogQueue
+	logmessage := tools.NewOrchSchedlog(fmt.Sprintf("ping scheduler has started with ping rate %v", pingrate))
+	meshorchestrator.LogQueue <- logmessage
+
+	for {
+		// Generate a ping ID and command to ping the mesh for sensors and push it to the commandQueue
+		pingid := fmt.Sprintf("controlping-scheduler-%v-mesh", tools.CurrentISOtime())
+		command := map[string]string{"command": "readsensors-mesh", "ping": pingid}
+		meshorchestrator.CommandQueue <- command
+
+		// Log the scheduled ping with the ping ID.
+		logmessage := tools.NewOrchSchedlog(fmt.Sprintf("mesh pinged for sensor data. pingID -  %v", pingid))
+		meshorchestrator.LogQueue <- logmessage
+		// Sleep for the pingrate number of seconds.
+		time.Sleep(time.Second * time.Duration(pingrate))
 	}
 }
 
@@ -237,8 +266,14 @@ func Start_ORCH_Server(linkclient pb.InterfaceClient, meshorchestrator *tools.Me
 	grpcserver := grpc.NewServer()
 	pb.RegisterOrchestratorServer(grpcserver, &OrchestratorServer{meshorchestrator: meshorchestrator})
 
-	// Start a go-routine to check the server's command queue and push them to LINK server
-	go pushcommands(linkclient, meshorchestrator)
+	// Start a go-routine to check the server's command queue and push them to LINK server.
+	go CommandHandler(linkclient, meshorchestrator)
+
+	// Start a go-routine to check the servers's accumulation queue and handle the recieved pings.
+	go tools.PingHandler(meshorchestrator)
+
+	// Start a go-routine to send scheduled pings to the mesh
+	go Scheduler(meshorchestrator)
 
 	// Call the Initialize method the meshorchestrator to configure the node list and control node fields.
 	meshorchestrator.Initialize()
