@@ -16,7 +16,7 @@ recieved from the serial port and restructure them appropriately.
 import json
 import datetime
 
-logtime = lambda: datetime.datetime.utcnow().isoformat()
+logtime = lambda: datetime.datetime.utcnow().isoformat().split(".")[0]
 
 def dictparse(data):
     """ A function that attempts to parse the receieved data as a JSON dictonary"""
