@@ -32,7 +32,7 @@ type SensorPing struct {
 	Pingtime string
 
 	// A float32 value that reprsents the probability of fire in the neighbourhood of the node
-	Fireprobability float32
+	Fireprobability float64
 }
 
 // A function that calculates the probability of a fire in the
@@ -138,15 +138,53 @@ func (meshping *MeshPing) Complete() bool {
 	return true
 }
 
-// A method of MeshPing that flushes a completed MeshPing.
-// Currently is a placeholder and simples deletes the MeshPing
-// from the MeshOrchestrator's accumulation of pings.
-func (meshping *MeshPing) Flush(meshorchestrator *MeshOrchestrator) error {
-	// TODO: Attach to a cloud interface
+// A method of MeshPing that generates and returns a mappings of the string node ID to its Sensordata map
+func (meshping *MeshPing) GenerateSensordatamap() map[string]map[string]float64 {
+	// Create an empty sensordata map
+	sensordata := make(map[string]map[string]float64)
 
-	// Log the scheduled ping with the ping ID.
-	logmessage := NewOrchCloudlog(fmt.Sprintf("mesh ping was flushed. pingID - %v", meshping.PingID))
+	// Iterate over the Pings in the meshping
+	for nodeid, sensorping := range meshping.Pings {
+		// Convert the nodeIDs to strings and assign the Sensordata
+		sensordata[strconv.FormatInt(nodeid, 10)] = sensorping.Sensordata
+	}
+
+	// Return the sensordata
+	return sensordata
+}
+
+// A method of MeshPing that generates and a mapping of string node ID to the fire probability value
+func (meshping *MeshPing) GenerateProbabilitydatamap() map[string]float64 {
+	// Create an empty probability map
+	probdata := make(map[string]float64)
+
+	// Iterate over the Pings of the meshping
+	for nodeid, sensorping := range meshping.Pings {
+		// Convert the nodeIDs to strings and assign the Fireprobability value
+		probdata[strconv.FormatInt(nodeid, 10)] = float64(sensorping.Fireprobability)
+	}
+
+	// Return the probdata
+	return probdata
+}
+
+// A method of MeshPing that flushes a completed MeshPing to the cloud.
+func (meshping *MeshPing) Flush(meshorchestrator *MeshOrchestrator) error {
+	// Generate a new PingDocument from the meshping
+	pingdoc := NewPingDocument(meshping)
+
+	// Push the pingdoc to the cloud and check the success.
+	err := pingdoc.Push(&meshorchestrator.Cloudinterface)
+	if err != nil {
+		// Log the meshping failing to be flushed to the cloud.
+		logmessage := NewOrchCloudlog(fmt.Sprintf("mesh ping was accumulated and unable to be flushed. pingID - %v", meshping.PingID))
+		meshorchestrator.LogQueue <- logmessage
+	}
+
+	// Log the meshping succesfully being flushed to the cloud.
+	logmessage := NewOrchCloudlog(fmt.Sprintf("mesh ping was accumulated and successfully flushed. pingID - %v", meshping.PingID))
 	meshorchestrator.LogQueue <- logmessage
+
 	// Delete the meshping from the accumulation
 	delete(meshorchestrator.Accumulation, meshping.PingID)
 	return nil

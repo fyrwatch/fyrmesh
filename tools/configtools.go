@@ -53,17 +53,17 @@ func ReadConfig() (Config, error) {
 	filelocation := filepath.Join(filedir, "config.json")
 
 	// Open the config file
-	configFile, err := os.Open(filelocation)
+	configfile, err := os.Open(filelocation)
 	if err != nil {
 		return Config{}, err
 	}
 
 	// Defer the closing of the file
-	defer configFile.Close()
+	defer configfile.Close()
 
 	// Read the config file into a byte array
 	var config Config
-	byteValue, _ := ioutil.ReadAll(configFile)
+	byteValue, _ := ioutil.ReadAll(configfile)
 
 	// Marhsall the JSON byte array into a struct and return it
 	json.Unmarshal([]byte(byteValue), &config)
@@ -77,7 +77,7 @@ func CheckConfig() (bool, error) {
 	filedir := os.Getenv("FYRMESHCONFIG")
 	// Construct the path to the config file
 	filelocation := filepath.Join(filedir, "config.json")
-	if filelocation == "" {
+	if filedir == "" {
 		return false, fmt.Errorf("environment variable 'FYRMESHCONFIG' has not been set")
 	}
 
@@ -101,7 +101,7 @@ func WriteConfig(config Config) error {
 	filedir := os.Getenv("FYRMESHCONFIG")
 	// Construct the path to the config file
 	filelocation := filepath.Join(filedir, "config.json")
-	if filelocation == "" {
+	if filedir == "" {
 		return fmt.Errorf("environment variable 'FYRMESHCONFIG' has not been set")
 	}
 

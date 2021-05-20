@@ -46,37 +46,37 @@ func checkSliceEquality(x, y []int64) bool {
 // and its hardware configuration values.
 type SensorNode struct {
 	// The identifier of the node
-	NodeID int64
+	NodeID int64 `firestore:"nodeID"`
 
 	// The serial baud rate of the node
-	SerialBaud int
+	SerialBaud int `firestore:"serialbaud"`
 
 	// The type of DHT sensor attached
-	DHTtype int
+	DHTtype int `firestore:"dht_type"`
 
 	// The pin on which the DHT sensor is attached
-	DHTpin int
+	DHTpin int `firestore:"dht_pin"`
 
 	// The type of FLM sensor attached
-	FLMtype int
+	FLMtype int `firestore:"flm_type"`
 
 	// The pin on which the FLM sensor is attached
-	FLMpin int
+	FLMpin int `firestore:"flm_pin"`
 
 	// The type of GAS sensor attached
-	GAStype int
+	GAStype int `firestore:"gas_type"`
 
 	// The pin on which the GAS sensor is attached
-	GASpin int
+	GASpin int `firestore:"gas_pin"`
 
 	// The bool indicating if the node has a pinger button
-	Pinger bool
+	Pinger bool `firestore:"pinger"`
 
 	// The pin on which the pinger button is attached
-	Pingerpin int
+	Pingerpin int `firestore:"pinger_pin"`
 
 	// The pin on which the connect LED is attached
-	Connectpin int
+	Connectpin int `firestore:"connect_pin"`
 }
 
 // A method of SensorNode that returns the
@@ -143,28 +143,28 @@ func NewSensorNode(log Log) (*SensorNode, error) {
 // values along with the configuration values that define the mesh.
 type ControlNode struct {
 	// The identifier of the node
-	NodeID int64
+	NodeID int64 `firestore:"nodeID"`
 
 	// The serial baud rate of the node
-	SerialBaud int
+	SerialBaud int `firestore:"serialbaud"`
 
 	// The bool indicating if the node has a pinger button
-	Pinger bool
+	Pinger bool `firestore:"pinger"`
 
 	// The pin on which the pinger button is attached
-	Pingerpin int
+	Pingerpin int `firestore:"pinger_pin"`
 
 	// The pin on which the connect LED is attached
-	Connectpin int
+	Connectpin int `firestore:"connect_pin"`
 
 	// The SSID of the mesh network
-	MeshSSID string
+	MeshSSID string `firestore:"MESHSSID"`
 
 	// The password of the mesh network
-	MeshPSWD string
+	MeshPSWD string `firestore:"MESHPSWD"`
 
 	// The port which the mesh network nodes communicate
-	MeshPORT int
+	MeshPORT int `firestore:"MESHPORT"`
 }
 
 // A constructor function that generates and returns a ControlNode.
@@ -219,6 +219,12 @@ type MeshOrchestrator struct {
 	// A map of string keys and MeshPing values. Maps the Pings to their respective pingIDs
 	Accumulation map[string]MeshPing
 
+	// A CloudInterface object for the mesh to connect to the database.
+	Cloudinterface CloudInterface
+
+	// A MeshDocument object that represents the mesh.
+	MeshDoc MeshDocument
+
 	// A channel of Logs that is used by all components to communicate between each other and to the console
 	LogQueue chan Log
 
@@ -242,10 +248,27 @@ func NewMeshOrchestrator() (*MeshOrchestrator, error) {
 	// Create a null MeshOrchestrator
 	meshorchestrator := MeshOrchestrator{}
 
+	// Read the config file
+	meshconfig, err := ReadConfig()
+	if err != nil {
+		return nil, fmt.Errorf("could not read config file - %v", err)
+	}
+
+	// Construct a new CloudInterface for the deviceID
+	cloudinterface, err := NewCloudInterface(meshconfig.DeviceID)
+	if err != nil {
+		return nil, fmt.Errorf("could not contruct cloud interface - %v", err)
+	}
+
 	// Set connection state to false by default
 	meshorchestrator.MeshConnected = false
+	// Set the ControllerID to the DeviceID from the config
+	meshorchestrator.ControllerID = meshconfig.DeviceID
 	// Set the control node of the mesh
 	meshorchestrator.Controlnode = ControlNode{}
+	// Set the cloud interface object to the newly generated interface
+	meshorchestrator.Cloudinterface = *cloudinterface
+
 	// Set the list of node IDs on the mesh to an emtpy slice of int
 	meshorchestrator.NodeIDlist = make([]int64, 0)
 	// Set the list of nodes on the mesh to an empty map of int -> SensorNode
@@ -262,20 +285,18 @@ func NewMeshOrchestrator() (*MeshOrchestrator, error) {
 	// Create an accumulator queue that will be passed into the PingHandler to collect pings.
 	meshorchestrator.AccumulatorQueue = make(chan SensorPing)
 
-	// Read the config file
-	meshconfig, err := ReadConfig()
-	if err != nil {
-		return nil, fmt.Errorf("could not read config file - %v", err)
-	}
+	// Create and assign the current state of the MeshOrchestrator to the MeshDoc
+	meshorchestrator.MeshDoc = *NewMeshDocument(&meshorchestrator)
 
-	// Set the ControllerID to the DeviceID from the config
-	meshorchestrator.ControllerID = meshconfig.DeviceID
 	// Return the meshorchestrator and nill error
 	return &meshorchestrator, nil
 }
 
-// A method of MeshOrchestrator that closes all the channels inside it.
+// A method of MeshOrchestrator that closes all the channels and clients within it.
 func (meshorchestrator *MeshOrchestrator) Close() {
+	// Close the CloudInterface client
+	meshorchestrator.Cloudinterface.FirestoreClient.Close()
+
 	// Close all the channels within the MeshOrchestrator
 	close(meshorchestrator.AccumulatorQueue)
 	close(meshorchestrator.ObserverQueue)
@@ -294,6 +315,24 @@ func (meshorchestrator *MeshOrchestrator) Initialize() {
 	// Send the command to read the mesh node list to the CommandQueue
 	command = map[string]string{"command": "readnodelist-control"}
 	meshorchestrator.CommandQueue <- command
+}
+
+// A method of MeshOrchestrator that flushes the MeshDoc field to the cloud.
+func (meshorchestrator *MeshOrchestrator) Flush() {
+	// Update the MeshDoc with the current state of the MeshOrchestrator
+	meshorchestrator.MeshDoc = *NewMeshDocument(meshorchestrator)
+
+	// Push the meshdoc to the cloud and check the status
+	err := meshorchestrator.MeshDoc.Push(&meshorchestrator.Cloudinterface)
+	if err != nil {
+		// Log the meshdoc failing to be flushed to the cloud.
+		logmessage := NewOrchCloudlog(fmt.Sprintf("mesh document was unable to be flushed. pingID - %v", meshorchestrator.MeshDoc.ControllerID))
+		meshorchestrator.LogQueue <- logmessage
+	}
+
+	// Log the meshdoc succesfully being flushed to the cloud.
+	logmessage := NewOrchCloudlog(fmt.Sprintf("mesh document was flushed. pingID - %v", meshorchestrator.MeshDoc.ControllerID))
+	meshorchestrator.LogQueue <- logmessage
 }
 
 // A method of MeshOrchestrator that accepts a Log of type 'nodelist' and parses the nodelist sequence
@@ -329,6 +368,8 @@ func (meshorchestrator *MeshOrchestrator) SetNodeIDlist(log Log) error {
 	meshorchestrator.NodeIDlist = nodelist
 	// Call the method to update the NodeList based on the new NodeIDlist
 	meshorchestrator.UpdateNodelist()
+	// Call the method to update the MeshDocument and flush it
+	meshorchestrator.Flush()
 	return nil
 }
 
@@ -350,6 +391,8 @@ func (meshorchestrator *MeshOrchestrator) SetControlnode(log Log) error {
 
 	// Assign the controlnode to the meshorchestrator
 	meshorchestrator.Controlnode = *controlnode
+	// Call the method to update the MeshDocument and flush it
+	meshorchestrator.Flush()
 	return nil
 }
 
@@ -372,6 +415,8 @@ func (meshorchestrator *MeshOrchestrator) SetNode(log Log) error {
 
 	// Assign the sensornode to the meshorchestrator's Nodelist
 	meshorchestrator.Nodelist[sensornode.NodeID] = *sensornode
+	// Call the method to update the MeshDocument and flush it
+	meshorchestrator.Flush()
 	return nil
 }
 

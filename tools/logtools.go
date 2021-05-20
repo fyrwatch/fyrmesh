@@ -221,7 +221,7 @@ func StringifyLog(log Log) string {
 	// Declare a string log
 	var strlog string
 	// Define the common prefix of all logs
-	logprefix := fmt.Sprintf("[%s][%s]%5s[%s]", logsource, logtime, "", logtype)
+	logprefix := fmt.Sprintf("[%s][%s]%20s", logsource, logtime, logtype)
 
 	// Check the logtype and set the appropriate format
 	switch logtype {
@@ -229,41 +229,41 @@ func StringifyLog(log Log) string {
 		strlog = fmt.Sprintf("%v %v", logprefix, logmessage)
 
 	case "protolog":
-		strlog = fmt.Sprintf("%v || %v | gRPC-%v-%v | error - %v |", logprefix, logmetadata["server"], logmetadata["service"], logmessage, logmetadata["error"])
+		strlog = fmt.Sprintf("%v|| %v | gRPC-%v-%v | error - %v |", logprefix, logmetadata["server"], logmetadata["service"], logmessage, logmetadata["error"])
 
 	case "cloudlog":
-		strlog = fmt.Sprintf("%v || %v |", logprefix, logmessage)
+		strlog = fmt.Sprintf("%v|| %v |", logprefix, logmessage)
 
 	case "schedlog":
-		strlog = fmt.Sprintf("%v || %v |", logprefix, logmessage)
+		strlog = fmt.Sprintf("%v|| %v |", logprefix, logmessage)
 
 	case "message":
-		strlog = fmt.Sprintf("%v || %v | gRPC-%v-%v |", logprefix, logmetadata["format"], logmetadata["type"], logmessage)
+		strlog = fmt.Sprintf("%v|| %v | gRPC-%v-%v |", logprefix, logmetadata["format"], logmetadata["type"], logmessage)
 
 	case "newconnection":
-		strlog = fmt.Sprintf("%v || %v | node - %v |", logprefix, logmessage, logmetadata["node"])
+		strlog = fmt.Sprintf("%v|| %v | node - %v |", logprefix, logmessage, logmetadata["node"])
 
 	case "changedconnection":
-		strlog = fmt.Sprintf("%v || %v", logprefix, logmessage)
+		strlog = fmt.Sprintf("%v|| %v", logprefix, logmessage)
 
 	case "nodetimeadjust":
-		strlog = fmt.Sprintf("%v || %v | offset - %v |", logprefix, logmessage, logmetadata["offset"])
+		strlog = fmt.Sprintf("%v|| %v | offset - %v |", logprefix, logmessage, logmetadata["offset"])
 
 	case "handshake":
-		strlog = fmt.Sprintf("%v || %v | node - %v |", logprefix, logmessage, logmetadata["node"])
+		strlog = fmt.Sprintf("%v|| %v | node - %v |", logprefix, logmessage, logmetadata["node"])
 
 	case "sensordata":
 		sensordata := Deepdeserialize(logmetadata["sensors"])
-		strlog = fmt.Sprintf("%v || %v | sensors - %v | node - %v | ping - %v |", logprefix, logmessage, sensordata, logmetadata["node"], logmetadata["ping"])
+		strlog = fmt.Sprintf("%v|| %v | sensors - %v | node - %v | ping - %v |", logprefix, logmessage, sensordata, logmetadata["node"], logmetadata["ping"])
 
 	case "configdata":
-		strlog = fmt.Sprintf("%v || %v | node - %v | ping - %v", logprefix, logmessage, logmetadata["node"], logmetadata["ping"])
+		strlog = fmt.Sprintf("%v|| %v | node - %v | ping - %v", logprefix, logmessage, logmetadata["node"], logmetadata["ping"])
 
 	case "controlconfig":
-		strlog = fmt.Sprintf("%v || %v | node - %v |", logprefix, logmessage, logmetadata["nodeID"])
+		strlog = fmt.Sprintf("%v|| %v | node - %v |", logprefix, logmessage, logmetadata["nodeID"])
 
 	case "nodelist":
-		strlog = fmt.Sprintf("%v || %v", logprefix, logmessage)
+		strlog = fmt.Sprintf("%v|| %v", logprefix, logmessage)
 	}
 
 	// Return the string log
