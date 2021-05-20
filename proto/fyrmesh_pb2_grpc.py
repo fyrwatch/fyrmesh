@@ -138,6 +138,16 @@ class OrchestratorStub(object):
                 request_serializer=proto_dot_fyrmesh__pb2.ControlCommand.SerializeToString,
                 response_deserializer=proto_dot_fyrmesh__pb2.Acknowledge.FromString,
                 )
+        self.SchedulerToggle = channel.unary_unary(
+                '/main.Orchestrator/SchedulerToggle',
+                request_serializer=proto_dot_fyrmesh__pb2.Trigger.SerializeToString,
+                response_deserializer=proto_dot_fyrmesh__pb2.Acknowledge.FromString,
+                )
+        self.Simulate = channel.unary_unary(
+                '/main.Orchestrator/Simulate',
+                request_serializer=proto_dot_fyrmesh__pb2.Trigger.SerializeToString,
+                response_deserializer=proto_dot_fyrmesh__pb2.Acknowledge.FromString,
+                )
 
 
 class OrchestratorServicer(object):
@@ -179,6 +189,18 @@ class OrchestratorServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def SchedulerToggle(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def Simulate(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_OrchestratorServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -210,6 +232,16 @@ def add_OrchestratorServicer_to_server(servicer, server):
             'Command': grpc.unary_unary_rpc_method_handler(
                     servicer.Command,
                     request_deserializer=proto_dot_fyrmesh__pb2.ControlCommand.FromString,
+                    response_serializer=proto_dot_fyrmesh__pb2.Acknowledge.SerializeToString,
+            ),
+            'SchedulerToggle': grpc.unary_unary_rpc_method_handler(
+                    servicer.SchedulerToggle,
+                    request_deserializer=proto_dot_fyrmesh__pb2.Trigger.FromString,
+                    response_serializer=proto_dot_fyrmesh__pb2.Acknowledge.SerializeToString,
+            ),
+            'Simulate': grpc.unary_unary_rpc_method_handler(
+                    servicer.Simulate,
+                    request_deserializer=proto_dot_fyrmesh__pb2.Trigger.FromString,
                     response_serializer=proto_dot_fyrmesh__pb2.Acknowledge.SerializeToString,
             ),
     }
@@ -320,6 +352,40 @@ class Orchestrator(object):
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/main.Orchestrator/Command',
             proto_dot_fyrmesh__pb2.ControlCommand.SerializeToString,
+            proto_dot_fyrmesh__pb2.Acknowledge.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def SchedulerToggle(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/main.Orchestrator/SchedulerToggle',
+            proto_dot_fyrmesh__pb2.Trigger.SerializeToString,
+            proto_dot_fyrmesh__pb2.Acknowledge.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def Simulate(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/main.Orchestrator/Simulate',
+            proto_dot_fyrmesh__pb2.Trigger.SerializeToString,
             proto_dot_fyrmesh__pb2.Acknowledge.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

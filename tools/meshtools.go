@@ -225,6 +225,9 @@ type MeshOrchestrator struct {
 	// A MeshDocument object that represents the mesh.
 	MeshDoc MeshDocument
 
+	// A bool indicating if the scheduler is on or not.
+	SchedulerOn bool
+
 	// A channel of Logs that is used by all components to communicate between each other and to the console
 	LogQueue chan Log
 
@@ -260,8 +263,9 @@ func NewMeshOrchestrator() (*MeshOrchestrator, error) {
 		return nil, fmt.Errorf("could not contruct cloud interface - %v", err)
 	}
 
-	// Set connection state to false by default
+	// Set connection state and scheduler toggle to false by default
 	meshorchestrator.MeshConnected = false
+	meshorchestrator.SchedulerOn = false
 	// Set the ControllerID to the DeviceID from the config
 	meshorchestrator.ControllerID = meshconfig.DeviceID
 	// Set the control node of the mesh

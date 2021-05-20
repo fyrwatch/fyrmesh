@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=b'Z\006/proto',
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\x13proto/fyrmesh.proto\x12\x04main\"\x81\x01\n\x07Trigger\x12\x16\n\x0etriggermessage\x18\x01 \x01(\t\x12-\n\x08metadata\x18\x02 \x03(\x0b\x32\x1b.main.Trigger.MetadataEntry\x1a/\n\rMetadataEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"-\n\x0b\x41\x63knowledge\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\r\n\x05\x65rror\x18\x02 \x01(\t\"\xa8\x01\n\x0eMeshOrchStatus\x12\x11\n\tconnected\x18\x01 \x01(\x08\x12\x14\n\x0c\x63ontrollerID\x18\x02 \x01(\t\x12\x15\n\rcontrolnodeID\x18\x03 \x01(\x03\x12 \n\x08nodelist\x18\x04 \x01(\x0b\x32\x0e.main.NodeList\x12\x10\n\x08meshSSID\x18\x05 \x01(\t\x12\x10\n\x08meshPSWD\x18\x06 \x01(\t\x12\x10\n\x08meshPORT\x18\x07 \x01(\x05\"\x1c\n\tSimpleLog\x12\x0f\n\x07message\x18\x01 \x01(\t\"\xc1\x01\n\nComplexLog\x12\x11\n\tlogsource\x18\x01 \x01(\t\x12\x0f\n\x07logtype\x18\x02 \x01(\t\x12\x0f\n\x07logtime\x18\x03 \x01(\t\x12\x12\n\nlogmessage\x18\x04 \x01(\t\x12\x36\n\x0blogmetadata\x18\x05 \x03(\x0b\x32!.main.ComplexLog.LogmetadataEntry\x1a\x32\n\x10LogmetadataEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"\x88\x01\n\x0e\x43ontrolCommand\x12\x0f\n\x07\x63ommand\x18\x01 \x01(\t\x12\x34\n\x08metadata\x18\x02 \x03(\x0b\x32\".main.ControlCommand.MetadataEntry\x1a/\n\rMetadataEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"b\n\x08NodeList\x12(\n\x05nodes\x18\x01 \x03(\x0b\x32\x19.main.NodeList.NodesEntry\x1a,\n\nNodesEntry\x12\x0b\n\x03key\x18\x01 \x01(\x03\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x32l\n\tInterface\x12+\n\x04Read\x12\r.main.Trigger\x1a\x10.main.ComplexLog\"\x00\x30\x01\x12\x32\n\x05Write\x12\x14.main.ControlCommand\x1a\x11.main.Acknowledge\"\x00\x32\xaf\x02\n\x0cOrchestrator\x12/\n\x06Status\x12\r.main.Trigger\x1a\x14.main.MeshOrchStatus\"\x00\x12\x30\n\nConnection\x12\r.main.Trigger\x1a\x11.main.Acknowledge\"\x00\x12-\n\x07Observe\x12\r.main.Trigger\x1a\x0f.main.SimpleLog\"\x00\x30\x01\x12*\n\x04Ping\x12\r.main.Trigger\x1a\x11.main.Acknowledge\"\x00\x12+\n\x08Nodelist\x12\r.main.Trigger\x1a\x0e.main.NodeList\"\x00\x12\x34\n\x07\x43ommand\x12\x14.main.ControlCommand\x1a\x11.main.Acknowledge\"\x00\x42\x08Z\x06/protob\x06proto3'
+  serialized_pb=b'\n\x13proto/fyrmesh.proto\x12\x04main\"\x81\x01\n\x07Trigger\x12\x16\n\x0etriggermessage\x18\x01 \x01(\t\x12-\n\x08metadata\x18\x02 \x03(\x0b\x32\x1b.main.Trigger.MetadataEntry\x1a/\n\rMetadataEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"-\n\x0b\x41\x63knowledge\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\r\n\x05\x65rror\x18\x02 \x01(\t\"\xa8\x01\n\x0eMeshOrchStatus\x12\x11\n\tconnected\x18\x01 \x01(\x08\x12\x14\n\x0c\x63ontrollerID\x18\x02 \x01(\t\x12\x15\n\rcontrolnodeID\x18\x03 \x01(\x03\x12 \n\x08nodelist\x18\x04 \x01(\x0b\x32\x0e.main.NodeList\x12\x10\n\x08meshSSID\x18\x05 \x01(\t\x12\x10\n\x08meshPSWD\x18\x06 \x01(\t\x12\x10\n\x08meshPORT\x18\x07 \x01(\x05\"\x1c\n\tSimpleLog\x12\x0f\n\x07message\x18\x01 \x01(\t\"\xc1\x01\n\nComplexLog\x12\x11\n\tlogsource\x18\x01 \x01(\t\x12\x0f\n\x07logtype\x18\x02 \x01(\t\x12\x0f\n\x07logtime\x18\x03 \x01(\t\x12\x12\n\nlogmessage\x18\x04 \x01(\t\x12\x36\n\x0blogmetadata\x18\x05 \x03(\x0b\x32!.main.ComplexLog.LogmetadataEntry\x1a\x32\n\x10LogmetadataEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"\x88\x01\n\x0e\x43ontrolCommand\x12\x0f\n\x07\x63ommand\x18\x01 \x01(\t\x12\x34\n\x08metadata\x18\x02 \x03(\x0b\x32\".main.ControlCommand.MetadataEntry\x1a/\n\rMetadataEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"b\n\x08NodeList\x12(\n\x05nodes\x18\x01 \x03(\x0b\x32\x19.main.NodeList.NodesEntry\x1a,\n\nNodesEntry\x12\x0b\n\x03key\x18\x01 \x01(\x03\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x32l\n\tInterface\x12+\n\x04Read\x12\r.main.Trigger\x1a\x10.main.ComplexLog\"\x00\x30\x01\x12\x32\n\x05Write\x12\x14.main.ControlCommand\x1a\x11.main.Acknowledge\"\x00\x32\x96\x03\n\x0cOrchestrator\x12/\n\x06Status\x12\r.main.Trigger\x1a\x14.main.MeshOrchStatus\"\x00\x12\x30\n\nConnection\x12\r.main.Trigger\x1a\x11.main.Acknowledge\"\x00\x12-\n\x07Observe\x12\r.main.Trigger\x1a\x0f.main.SimpleLog\"\x00\x30\x01\x12*\n\x04Ping\x12\r.main.Trigger\x1a\x11.main.Acknowledge\"\x00\x12+\n\x08Nodelist\x12\r.main.Trigger\x1a\x0e.main.NodeList\"\x00\x12\x34\n\x07\x43ommand\x12\x14.main.ControlCommand\x1a\x11.main.Acknowledge\"\x00\x12\x35\n\x0fSchedulerToggle\x12\r.main.Trigger\x1a\x11.main.Acknowledge\"\x00\x12.\n\x08Simulate\x12\r.main.Trigger\x1a\x11.main.Acknowledge\"\x00\x42\x08Z\x06/protob\x06proto3'
 )
 
 
@@ -641,7 +641,7 @@ _ORCHESTRATOR = _descriptor.ServiceDescriptor(
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
   serialized_start=955,
-  serialized_end=1258,
+  serialized_end=1361,
   methods=[
   _descriptor.MethodDescriptor(
     name='Status',
@@ -699,6 +699,26 @@ _ORCHESTRATOR = _descriptor.ServiceDescriptor(
     index=5,
     containing_service=None,
     input_type=_CONTROLCOMMAND,
+    output_type=_ACKNOWLEDGE,
+    serialized_options=None,
+    create_key=_descriptor._internal_create_key,
+  ),
+  _descriptor.MethodDescriptor(
+    name='SchedulerToggle',
+    full_name='main.Orchestrator.SchedulerToggle',
+    index=6,
+    containing_service=None,
+    input_type=_TRIGGER,
+    output_type=_ACKNOWLEDGE,
+    serialized_options=None,
+    create_key=_descriptor._internal_create_key,
+  ),
+  _descriptor.MethodDescriptor(
+    name='Simulate',
+    full_name='main.Orchestrator.Simulate',
+    index=7,
+    containing_service=None,
+    input_type=_TRIGGER,
     output_type=_ACKNOWLEDGE,
     serialized_options=None,
     create_key=_descriptor._internal_create_key,

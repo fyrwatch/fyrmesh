@@ -255,11 +255,7 @@ func FormatLog(log Log) string {
 
 	case "nodelist":
 		strlog = fmt.Sprintf("%v || (data) %v", logprefix, logmessage)
-
-	case "toggle":
-		strlog = fmt.Sprintf("%v || (toggle) %v", logprefix, logmessage)
 	}
-
 	// Return the string log
 	return strlog
 }
@@ -349,13 +345,13 @@ func LogHandler(meshorchestrator *MeshOrchestrator) {
 				// Enable the observerqueue
 				observertoggle = true
 				// Generate a server log
-				meshorchestrator.LogQueue <- NewOrchServerlog("observer queue enabled")
+				fmt.Println(FormatLog(NewOrchServerlog("(toggle) observer queue enabled")))
 
 			case "disable-observe":
 				// Disable the observerqueue
 				observertoggle = false
 				// Generate a server log
-				meshorchestrator.LogQueue <- NewOrchServerlog("observer queue disabled")
+				fmt.Println(FormatLog(NewOrchServerlog("(toggle) observer queue disabled")))
 			}
 		}
 	}

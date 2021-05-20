@@ -174,6 +174,8 @@ type OrchestratorClient interface {
 	Ping(ctx context.Context, in *Trigger, opts ...grpc.CallOption) (*Acknowledge, error)
 	Nodelist(ctx context.Context, in *Trigger, opts ...grpc.CallOption) (*NodeList, error)
 	Command(ctx context.Context, in *ControlCommand, opts ...grpc.CallOption) (*Acknowledge, error)
+	SchedulerToggle(ctx context.Context, in *Trigger, opts ...grpc.CallOption) (*Acknowledge, error)
+	Simulate(ctx context.Context, in *Trigger, opts ...grpc.CallOption) (*Acknowledge, error)
 }
 
 type orchestratorClient struct {
@@ -261,6 +263,24 @@ func (c *orchestratorClient) Command(ctx context.Context, in *ControlCommand, op
 	return out, nil
 }
 
+func (c *orchestratorClient) SchedulerToggle(ctx context.Context, in *Trigger, opts ...grpc.CallOption) (*Acknowledge, error) {
+	out := new(Acknowledge)
+	err := c.cc.Invoke(ctx, "/main.Orchestrator/SchedulerToggle", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *orchestratorClient) Simulate(ctx context.Context, in *Trigger, opts ...grpc.CallOption) (*Acknowledge, error) {
+	out := new(Acknowledge)
+	err := c.cc.Invoke(ctx, "/main.Orchestrator/Simulate", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // OrchestratorServer is the server API for Orchestrator service.
 // All implementations must embed UnimplementedOrchestratorServer
 // for forward compatibility
@@ -271,6 +291,8 @@ type OrchestratorServer interface {
 	Ping(context.Context, *Trigger) (*Acknowledge, error)
 	Nodelist(context.Context, *Trigger) (*NodeList, error)
 	Command(context.Context, *ControlCommand) (*Acknowledge, error)
+	SchedulerToggle(context.Context, *Trigger) (*Acknowledge, error)
+	Simulate(context.Context, *Trigger) (*Acknowledge, error)
 	mustEmbedUnimplementedOrchestratorServer()
 }
 
@@ -295,6 +317,12 @@ func (UnimplementedOrchestratorServer) Nodelist(context.Context, *Trigger) (*Nod
 }
 func (UnimplementedOrchestratorServer) Command(context.Context, *ControlCommand) (*Acknowledge, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Command not implemented")
+}
+func (UnimplementedOrchestratorServer) SchedulerToggle(context.Context, *Trigger) (*Acknowledge, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SchedulerToggle not implemented")
+}
+func (UnimplementedOrchestratorServer) Simulate(context.Context, *Trigger) (*Acknowledge, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Simulate not implemented")
 }
 func (UnimplementedOrchestratorServer) mustEmbedUnimplementedOrchestratorServer() {}
 
@@ -420,6 +448,42 @@ func _Orchestrator_Command_Handler(srv interface{}, ctx context.Context, dec fun
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Orchestrator_SchedulerToggle_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Trigger)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OrchestratorServer).SchedulerToggle(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/main.Orchestrator/SchedulerToggle",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OrchestratorServer).SchedulerToggle(ctx, req.(*Trigger))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Orchestrator_Simulate_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Trigger)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OrchestratorServer).Simulate(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/main.Orchestrator/Simulate",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OrchestratorServer).Simulate(ctx, req.(*Trigger))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Orchestrator_ServiceDesc is the grpc.ServiceDesc for Orchestrator service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -446,6 +510,14 @@ var Orchestrator_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Command",
 			Handler:    _Orchestrator_Command_Handler,
+		},
+		{
+			MethodName: "SchedulerToggle",
+			Handler:    _Orchestrator_SchedulerToggle_Handler,
+		},
+		{
+			MethodName: "Simulate",
+			Handler:    _Orchestrator_Simulate_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{

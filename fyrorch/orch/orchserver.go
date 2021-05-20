@@ -207,6 +207,35 @@ func (server *OrchestratorServer) Nodelist(ctx context.Context, trigger *pb.Trig
 	return &pb.NodeList{Nodes: server.meshorchestrator.GetSimpleNodeList()}, nil
 }
 
+// A function that implements the 'SchedulerToggle' method of the Orchestrator service.
+// Accepts a Trigger and returns an Acknowledge.
+func (server *OrchestratorServer) SchedulerToggle(ctx context.Context, trigger *pb.Trigger) (*pb.Acknowledge, error) {
+	// Retrieve the trigger message from the Message object
+	triggermessage := trigger.GetTriggermessage()
+
+	// Check the value of the command message
+	switch triggermessage {
+	case "setscheduler-on":
+		// Set the schedulerOn value to True
+		server.meshorchestrator.SchedulerOn = true
+		// Log the start of the scheduled pinging to the LogQueue
+		server.meshorchestrator.LogQueue <- tools.NewOrchSchedlog(fmt.Sprintf("(start) scheduler has started"))
+
+	case "setscheduler-off":
+		// Set the schedulerOn value to True
+		server.meshorchestrator.SchedulerOn = false
+		// Log the stop of the scheduled pinging to the LogQueue
+		server.meshorchestrator.LogQueue <- tools.NewOrchSchedlog(fmt.Sprintf("(stop) scheduler has stopped"))
+
+	default:
+		// Default to returning a fail Acknowledge because of an unsupported trigger message
+		return &pb.Acknowledge{Success: false, Error: "unsupported trigger"}, nil
+	}
+
+	// Return an success Acknowledge with no error
+	return &pb.Acknowledge{Success: true, Error: "nil"}, nil
+}
+
 // A function that handles the output of the commands recieved over a given command queue
 // by passing each recieved command to function that calls the the 'Write' method of the
 // interface LINK server. Iterates infinitely until the commandqueue is closed.
@@ -230,13 +259,16 @@ func Scheduler(meshorchestrator *tools.MeshOrchestrator, pingrate int) {
 	meshorchestrator.LogQueue <- tools.NewOrchSchedlog(fmt.Sprintf("(startup) scheduler has started | pingrate - %v", pingrate))
 
 	for {
-		// Generate a ping ID and command to ping the mesh for sensors and push it to the commandQueue
-		pingid := fmt.Sprintf("controlping-scheduler-%v-mesh", tools.CurrentISOtime())
-		command := map[string]string{"command": "readsensors-mesh", "ping": pingid}
-		meshorchestrator.CommandQueue <- command
+		if meshorchestrator.SchedulerOn {
+			// Generate a ping ID and command to ping the mesh for sensors and push it to the commandQueue
+			pingid := fmt.Sprintf("controlping-scheduler-%v-mesh", tools.CurrentISOtime())
+			command := map[string]string{"command": "readsensors-mesh", "ping": pingid}
+			meshorchestrator.CommandQueue <- command
 
-		// Log the scheduled ping with the ping ID.
-		meshorchestrator.LogQueue <- tools.NewOrchSchedlog(fmt.Sprintf("(ping) mesh pinged for sensordata | pingID -  %v", pingid))
+			// Log the scheduled ping with the ping ID.
+			meshorchestrator.LogQueue <- tools.NewOrchSchedlog(fmt.Sprintf("(ping) mesh pinged for sensordata | pingID -  %v", pingid))
+		}
+
 		// Sleep for the pingrate number of seconds.
 		time.Sleep(time.Second * time.Duration(pingrate))
 	}

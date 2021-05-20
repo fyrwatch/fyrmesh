@@ -153,3 +153,32 @@ func Call_ORCH_Nodelist(client pb.OrchestratorClient) (map[int64]string, error) 
 	nodes := nodelist.GetNodes()
 	return nodes, nil
 }
+
+// A function that calls the 'SchedulerToggle' method of the ORCH server over a gRPC connection.
+// Requires the ORCH client and bool representing the toggle state.
+func Call_ORCH_SchedulerToggle(client pb.OrchestratorClient, toggle bool) error {
+	// Declare a trigger string
+	var trigger string
+
+	// Check the toggle
+	switch toggle {
+	case true:
+		trigger = "scheduler-on"
+	case false:
+		trigger = "scheduler-off"
+	}
+
+	// Call the SchedulerToggle method with the Trigger proto
+	acknowledge, err := client.SchedulerToggle(context.Background(), &pb.Trigger{Triggermessage: trigger})
+
+	// Check for errors and return the appropriate acknowledgement and error if any.
+	if err != nil {
+		return fmt.Errorf("call to ORCH Command runtime failed - %v", err)
+	}
+
+	if success := acknowledge.GetSuccess(); success {
+		return nil
+	} else {
+		return fmt.Errorf("call to ORCH Command returned a false acknowledge - %v", acknowledge.GetError())
+	}
+}
