@@ -72,7 +72,7 @@ func (server *OrchestratorServer) Observe(trigger *pb.Trigger, stream pb.Orchest
 
 	if triggermessage != "start-stream-observe" {
 		// If stream initiation code is invalid. Send one error message over the stream and return.
-		stream.Send(&pb.SimpleLog{Message: "[OBS] invalid observe stream initiation code"})
+		stream.Send(&pb.SimpleLog{Message: "invalid observe stream initiation code"})
 		return nil
 	}
 
@@ -211,6 +211,9 @@ func (server *OrchestratorServer) Nodelist(ctx context.Context, trigger *pb.Trig
 // by passing each recieved command to function that calls the the 'Write' method of the
 // interface LINK server. Iterates infinitely until the commandqueue is closed.
 func CommandHandler(linkclient pb.InterfaceClient, meshorchestrator *tools.MeshOrchestrator) {
+	// Log the beginning of the command handler
+	meshorchestrator.LogQueue <- tools.NewOrchSchedlog("(startup) command handler has started")
+
 	for command := range meshorchestrator.CommandQueue {
 		Call_LINK_Write(linkclient, meshorchestrator.LogQueue, command)
 	}
@@ -224,8 +227,7 @@ func Scheduler(meshorchestrator *tools.MeshOrchestrator, pingrate int) {
 	// Sleep for 15s to give time for other orchestrator services to initialize
 	time.Sleep(time.Second * 15)
 	// Log the beginning of the scheduled pinging to the LogQueue
-	logmessage := tools.NewOrchSchedlog(fmt.Sprintf("ping scheduler has started with ping rate %v", pingrate))
-	meshorchestrator.LogQueue <- logmessage
+	meshorchestrator.LogQueue <- tools.NewOrchSchedlog(fmt.Sprintf("(startup) scheduler has started | pingrate - %v", pingrate))
 
 	for {
 		// Generate a ping ID and command to ping the mesh for sensors and push it to the commandQueue
@@ -234,8 +236,7 @@ func Scheduler(meshorchestrator *tools.MeshOrchestrator, pingrate int) {
 		meshorchestrator.CommandQueue <- command
 
 		// Log the scheduled ping with the ping ID.
-		logmessage := tools.NewOrchSchedlog(fmt.Sprintf("mesh pinged for sensor data. pingID -  %v", pingid))
-		meshorchestrator.LogQueue <- logmessage
+		meshorchestrator.LogQueue <- tools.NewOrchSchedlog(fmt.Sprintf("(ping) mesh pinged for sensordata | pingID -  %v", pingid))
 		// Sleep for the pingrate number of seconds.
 		time.Sleep(time.Second * time.Duration(pingrate))
 	}
@@ -274,6 +275,7 @@ func Start_ORCH_Server(linkclient pb.InterfaceClient, meshorchestrator *tools.Me
 
 	// Call the Initialize method the meshorchestrator to configure the node list and control node fields.
 	meshorchestrator.Initialize()
+	meshorchestrator.LogQueue <- tools.NewOrchServerlog("(startup) mesh orchestrator has started")
 
 	// Serve the gRPC server on the listener port
 	if err := grpcserver.Serve(listener); err != nil {

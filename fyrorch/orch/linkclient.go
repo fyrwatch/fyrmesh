@@ -15,6 +15,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"time"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/status"
@@ -59,9 +60,9 @@ func Call_LINK_Write(client pb.InterfaceClient, logqueue chan tools.Log, command
 	// Check for errors and construct appropriate protolog
 	var logmessage *tools.OrchLog
 	if err != nil {
-		logmessage = tools.NewOrchProtolog("method call failed.", "LINK", "Write", err)
+		logmessage = tools.NewOrchProtolog("(failure) method call failed", "LINK", "Write", err)
 	} else {
-		msg := fmt.Sprintf("method call complete. command - %v. success - %v", commandmessage, acknowledge.GetSuccess())
+		msg := fmt.Sprintf("(success) method call complete | command - %v | success - %v", commandmessage, acknowledge.GetSuccess())
 		logmessage = tools.NewOrchProtolog(msg, "LINK", "Write", fmt.Errorf("%v", acknowledge.GetError()))
 	}
 
@@ -73,12 +74,14 @@ func Call_LINK_Write(client pb.InterfaceClient, logqueue chan tools.Log, command
 // Requires the LINK client object and a logqueue channel. InterfaceLogs recieved from
 // LINK server will continously parsed and passed into the logqueue channel to be handled.
 func Call_LINK_Read(client pb.InterfaceClient, logqueue chan tools.Log) {
+	// Sleep to let other services initialize
+	time.Sleep(time.Second * 5)
+
 	// Call the 'Read' method of the LINK client with the appropriate trigger message
 	stream, err := client.Read(context.Background(), &pb.Trigger{Triggermessage: "start-stream-read"})
 	if err != nil {
 		// Check for an error and push the protolog into the channel
-		logmessage := tools.NewOrchProtolog("method call failed.", "LINK", "Read", err)
-		logqueue <- logmessage
+		logqueue <- tools.NewOrchProtolog("(failure) method call failed.", "LINK", "Read", err)
 	}
 
 	// Start an infinite loop to read from the stream
@@ -95,8 +98,7 @@ func Call_LINK_Read(client pb.InterfaceClient, logqueue chan tools.Log) {
 		if err != nil {
 			errstatus, _ := status.FromError(err)
 			errmsg := fmt.Errorf("StreamError - (%v)%v", errstatus.Code(), errstatus.Message())
-			logmessage := tools.NewOrchProtolog("method runtime failed while streaming", "LINK", "Read", errmsg)
-			logqueue <- logmessage
+			logqueue <- tools.NewOrchProtolog("(failure) method runtime failed while streaming", "LINK", "Read", errmsg)
 			break
 		}
 

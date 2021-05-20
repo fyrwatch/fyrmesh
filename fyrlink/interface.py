@@ -59,7 +59,7 @@ class Interface(fyrmesh_pb2_grpc.InterfaceServicer):
                     logsource="LINK", 
                     logtype="protolog",
                     logtime=logtime(), 
-                    logmessage="invalid read stream initiation code", 
+                    logmessage="(error) invalid read stream initiation code", 
                     logmetadata={
                         "server": "LINK",
                         "service": "Read",
@@ -79,7 +79,7 @@ class Interface(fyrmesh_pb2_grpc.InterfaceServicer):
             commandqueue.put({"type": "controlcommand", "command": command, **metadata})
             logqueue.put({
                 "source": "LINK", "type": "protolog", "time": logtime(), 
-                "log": f"command '{command}' written to control node successfully",
+                "log": f"(success) command '{command}' written to control node successfully",
                 "metadata": {
                     "server": "LINK", 
                     "service": "Write",
@@ -89,7 +89,7 @@ class Interface(fyrmesh_pb2_grpc.InterfaceServicer):
         except Exception as e:
             logqueue.put({
                 "source": "LINK", "type": "protolog", "time": logtime(), 
-                "log": f"command '{command}' failed to written to control node.",
+                "log": f"(failure) command '{command}' failed to be written to control node.",
                 "metadata": {
                     "server": "LINK",
                     "service": "Write",
@@ -114,7 +114,7 @@ def grpc_serve():
             "source": "LINK", 
             "type": "serverlog", 
             "time": logtime(), 
-            "log": "Could not read config. 'FYRMESHCONFIG' env variable is not set",
+            "log": "(error) could not read config. 'FYRMESHCONFIG' env variable is not set",
             "metadata": {}
         })
         sys.exit()
@@ -134,7 +134,7 @@ def grpc_serve():
         "source": "LINK", 
         "type": "serverlog", 
         "time": logtime(), 
-        "log": "Interface Link gRPC Server started on http://localhost:50000",
+        "log": "(startup) interface link grpc server started on http://localhost:50000",
         "metadata": {}
     })
 
@@ -146,12 +146,12 @@ if __name__ == "__main__":
     # Define the IO thread workers that run concurrently
     readerthread = KillableThread(name="reader", target=reader, daemon=True)
     writerthread = KillableThread(name="writer", target=writer, daemon=True)
-    loggerthread = KillableThread(name="logger", target=logger, daemon=True)
+    #loggerthread = KillableThread(name="logger", target=logger, daemon=True)
 
     # Start the IO thread workers
     readerthread.start()
     writerthread.start()
-    loggerthread.start()
+    #loggerthread.start()
 
     try:
         # Start the gRPC server
@@ -161,7 +161,7 @@ if __name__ == "__main__":
         # Kill the IO thread workers
         readerthread.kill()
         writerthread.kill()
-        loggerthread.kill()
+        #loggerthread.kill()
     
     # Exit without handling regular exit runtimes such as printing tracebacks
     os._exit(1)

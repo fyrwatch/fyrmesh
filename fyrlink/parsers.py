@@ -70,26 +70,19 @@ def meshlogparse(meshlog: dict):
     meshlogtype = meshlogdata['type']
     logmessage = {"source": "MESH", "time": logtime()}
 
-    if meshlogtype == "newconnection":
+    if meshlogtype == "meshsync":
         logmessage.update({
-            "type": "newconnection", 
-            "log": "new node on mesh", 
+            "type": "meshsync",
+            "log": "mesh synchronization event",
             "metadata": {
-                "node": str(meshlogdata['newnode'])
+                "synctype": meshlogdata['sync']
             }
         })
-    
-    elif meshlogtype == "changedconnection":
-        logmessage.update({
-            "type": "changedconnection", 
-            "log": "mesh connections have changed", 
-            "metadata": {}
-        })
 
-    elif meshlogtype == "nodetimeadjust":
+    elif meshlogtype == "nodesync":
         logmessage.update({
-            "type": "nodetimeadjust", 
-            "log": "node time was adjusted to sync with the mesh", 
+            "type": "nodesync", 
+            "log": "node time synchronized", 
             "metadata": {
                 "offset": str(meshlogdata['offset'])
             }
@@ -98,7 +91,7 @@ def meshlogparse(meshlog: dict):
     elif meshlogtype == "handshake-rxack":
         logmessage.update({
             "type": "handshake", 
-            "log": "handshake completed with a node", 
+            "log": "node handshaked", 
             "metadata": {
                 "node": str(meshlogdata['node'])
             }
@@ -107,7 +100,7 @@ def meshlogparse(meshlog: dict):
     elif meshlogtype == "sensordata":
         logmessage.update({
             "type": "sensordata", 
-            "log": "sensor data received", 
+            "log": "sensordata acquired", 
             "metadata": {
                 "ping": meshlogdata['ping'],
                 "node": str(meshlogdata['node']),
@@ -118,7 +111,7 @@ def meshlogparse(meshlog: dict):
     elif meshlogtype == "configdata":
         logmessage.update({
             "type": "configdata", 
-            "log": "config data received", 
+            "log": "configdata acquired", 
             "metadata": {
                 "ping": meshlogdata['ping'],
                 "node": str(meshlogdata['node']),
@@ -128,8 +121,8 @@ def meshlogparse(meshlog: dict):
 
     elif meshlogtype == "controlconfigdata":
         logmessage.update({
-            "type": "controlconfig",
-            "log": "control node config data received",
+            "type": "ctrldata",
+            "log": "controlnode config acquired",
             "metadata": {
                 "nodeID": str(meshlogdata["config"]["NODEID"]),
                 "config": deepserialize(meshlogdata['config'])
@@ -139,7 +132,7 @@ def meshlogparse(meshlog: dict):
     elif meshlogtype == "controlnodelist":
         logmessage.update({
             "type": "nodelist",
-            "log": "mesh node list received",
+            "log": "mesh nodelist acquired",
             "metadata": {
                 "nodelist": meshlogdata["nodelist"]
             }

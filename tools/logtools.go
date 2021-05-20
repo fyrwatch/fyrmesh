@@ -184,7 +184,7 @@ func NewObsCommand(command string) *OrchLog {
 	orchlog := OrchLog{}
 	// Set the values of the OrchLog
 	orchlog.Logsource = "OBS"
-	orchlog.Logtype = "observertoggle"
+	orchlog.Logtype = "toggle"
 	orchlog.Logtime = CurrentISOtime()
 	orchlog.Logmessage = command
 	orchlog.Logmetadata = make(map[string]string)
@@ -202,7 +202,7 @@ func NewObserverLog(log Log) *ObserverLog {
 	obslog.Logsource = log.GetLogsource()
 	obslog.Logtype = log.GetLogtype()
 	// Stringify and set the Logmessage
-	obslog.Logmessage = StringifyLog(log)
+	obslog.Logmessage = FormatLog(log)
 	// Return the ObserverLog
 	return &obslog
 }
@@ -210,7 +210,7 @@ func NewObserverLog(log Log) *ObserverLog {
 // A function that simplifies and formats a Log into a string.
 // Every logtype has a different format but the general structure
 // of the string log is - '[source][time][type] message. metadata..'
-func StringifyLog(log Log) string {
+func FormatLog(log Log) string {
 	// Retrieve all the Log data
 	logsource := log.GetLogsource()
 	logtype := log.GetLogtype()
@@ -221,49 +221,43 @@ func StringifyLog(log Log) string {
 	// Declare a string log
 	var strlog string
 	// Define the common prefix of all logs
-	logprefix := fmt.Sprintf("[%s][%s]%20s", logsource, logtime, logtype)
+	logprefix := fmt.Sprintf("[%s][%s]%11s", logsource, logtime, logtype)
 
 	// Check the logtype and set the appropriate format
 	switch logtype {
-	case "serverlog":
-		strlog = fmt.Sprintf("%v %v", logprefix, logmessage)
+	case "serverlog", "cloudlog", "schedlog":
+		strlog = fmt.Sprintf("%v || %v |", logprefix, logmessage)
 
 	case "protolog":
-		strlog = fmt.Sprintf("%v|| %v | gRPC-%v-%v | error - %v |", logprefix, logmetadata["server"], logmetadata["service"], logmessage, logmetadata["error"])
-
-	case "cloudlog":
-		strlog = fmt.Sprintf("%v|| %v |", logprefix, logmessage)
-
-	case "schedlog":
-		strlog = fmt.Sprintf("%v|| %v |", logprefix, logmessage)
+		strlog = fmt.Sprintf("%v || %v | server - %v | service - %v| error - %v |", logprefix, logmessage, logmetadata["server"], logmetadata["service"], logmetadata["error"])
 
 	case "message":
-		strlog = fmt.Sprintf("%v|| %v | gRPC-%v-%v |", logprefix, logmetadata["format"], logmetadata["type"], logmessage)
+		strlog = fmt.Sprintf("%v || (%v) %v | type - %v |", logprefix, logmetadata["format"], logmessage, logmetadata["type"])
 
-	case "newconnection":
-		strlog = fmt.Sprintf("%v|| %v | node - %v |", logprefix, logmessage, logmetadata["node"])
+	case "meshsync":
+		strlog = fmt.Sprintf("%v || (meshevent) %v | event - %v |", logprefix, logmessage, logmetadata["synctype"])
 
-	case "changedconnection":
-		strlog = fmt.Sprintf("%v|| %v", logprefix, logmessage)
-
-	case "nodetimeadjust":
-		strlog = fmt.Sprintf("%v|| %v | offset - %v |", logprefix, logmessage, logmetadata["offset"])
+	case "nodesync":
+		strlog = fmt.Sprintf("%v || (meshevent) %v | offset - %v |", logprefix, logmessage, logmetadata["offset"])
 
 	case "handshake":
-		strlog = fmt.Sprintf("%v|| %v | node - %v |", logprefix, logmessage, logmetadata["node"])
+		strlog = fmt.Sprintf("%v || (meshevent) %v | node - %v |", logprefix, logmessage, logmetadata["node"])
 
 	case "sensordata":
 		sensordata := Deepdeserialize(logmetadata["sensors"])
-		strlog = fmt.Sprintf("%v|| %v | sensors - %v | node - %v | ping - %v |", logprefix, logmessage, sensordata, logmetadata["node"], logmetadata["ping"])
+		strlog = fmt.Sprintf("%v || (data) %v | sensors - %v | node - %v | ping - %v |", logprefix, logmessage, sensordata, logmetadata["node"], logmetadata["ping"])
 
 	case "configdata":
-		strlog = fmt.Sprintf("%v|| %v | node - %v | ping - %v", logprefix, logmessage, logmetadata["node"], logmetadata["ping"])
+		strlog = fmt.Sprintf("%v || (data) %v | node - %v | ping - %v |", logprefix, logmessage, logmetadata["node"], logmetadata["ping"])
 
-	case "controlconfig":
-		strlog = fmt.Sprintf("%v|| %v | node - %v |", logprefix, logmessage, logmetadata["nodeID"])
+	case "ctrldata":
+		strlog = fmt.Sprintf("%v || (data) %v | node - %v |", logprefix, logmessage, logmetadata["nodeID"])
 
 	case "nodelist":
-		strlog = fmt.Sprintf("%v|| %v", logprefix, logmessage)
+		strlog = fmt.Sprintf("%v || (data) %v", logprefix, logmessage)
+
+	case "toggle":
+		strlog = fmt.Sprintf("%v || (toggle) %v", logprefix, logmessage)
 	}
 
 	// Return the string log
@@ -275,6 +269,8 @@ func StringifyLog(log Log) string {
 func LogHandler(meshorchestrator *MeshOrchestrator) {
 	// Declare the observer toggle
 	observertoggle := false
+	// log the beginning of the loghandler
+	fmt.Println(FormatLog(NewOrchServerlog("(startup) log handler has started")))
 
 	// Iterate over the logqueue until it closes.
 	for log := range meshorchestrator.LogQueue {
@@ -282,20 +278,20 @@ func LogHandler(meshorchestrator *MeshOrchestrator) {
 		// Check the source of the log
 		logtype := log.GetLogtype()
 		switch logtype {
-		case "serverlog", "protolog", "cloudlog", "schedlog", "message", "nodetimeadjust":
+		case "serverlog", "protolog", "cloudlog", "schedlog", "message", "nodesync":
 			// Stringify and print
-			fmt.Println(StringifyLog(log))
+			fmt.Println(FormatLog(log))
 			// Send into observer queue if toggle is set
 			if observertoggle {
 				meshorchestrator.ObserverQueue <- *NewObserverLog(log)
 			}
 
-		case "handshake", "newconnection", "changedconnection":
+		case "handshake", "meshsync":
 			// Call the method to update the meshorchestrator's NodeIDlist
-			meshorchestrator.UpdateNodeIDlist()
+			go meshorchestrator.UpdateNodeIDlist()
 
 			// Stringify and print
-			fmt.Println(StringifyLog(log))
+			fmt.Println(FormatLog(log))
 			// Send into observer queue if toggle is set
 			if observertoggle {
 				meshorchestrator.ObserverQueue <- *NewObserverLog(log)
@@ -303,10 +299,10 @@ func LogHandler(meshorchestrator *MeshOrchestrator) {
 
 		case "sensordata":
 			// Set the sensor node data to be added into the accumulation queue
-			meshorchestrator.SetSensorData(log)
+			go meshorchestrator.SetSensorData(log)
 
 			// Stringify and print
-			fmt.Println(StringifyLog(log))
+			fmt.Println(FormatLog(log))
 			// Send into observer queue if toggle is set
 			if observertoggle {
 				meshorchestrator.ObserverQueue <- *NewObserverLog(log)
@@ -314,21 +310,21 @@ func LogHandler(meshorchestrator *MeshOrchestrator) {
 
 		case "configdata":
 			// Set the node configuration on the meshorchestrator's Nodelist
-			meshorchestrator.SetNode(log)
+			go meshorchestrator.SetNode(log)
 
 			// Stringify and print
-			fmt.Println(StringifyLog(log))
+			fmt.Println(FormatLog(log))
 			// Send into observer queue if toggle is set
 			if observertoggle {
 				meshorchestrator.ObserverQueue <- *NewObserverLog(log)
 			}
 
-		case "controlconfig":
+		case "ctrldata":
 			// Set the meshorchestrator's Controlnode
-			meshorchestrator.SetControlnode(log)
+			go meshorchestrator.SetControlnode(log)
 
 			// Stringify and print
-			fmt.Println(StringifyLog(log))
+			fmt.Println(FormatLog(log))
 			// Send into observer queue if toggle is set
 			if observertoggle {
 				meshorchestrator.ObserverQueue <- *NewObserverLog(log)
@@ -336,35 +332,30 @@ func LogHandler(meshorchestrator *MeshOrchestrator) {
 
 		case "nodelist":
 			// Set the meshorchestrator's NodeIDlist
-			meshorchestrator.SetNodeIDlist(log)
+			go meshorchestrator.SetNodeIDlist(log)
 
 			// Stringify and print
-			fmt.Println(StringifyLog(log))
+			fmt.Println(FormatLog(log))
 			// Send into observer queue if toggle is set
 			if observertoggle {
 				meshorchestrator.ObserverQueue <- *NewObserverLog(log)
 			}
 
-		case "observertoggle":
+		case "toggle":
 			// Check the toggle command
 			observertogglecommand := log.GetLogmessage()
 			switch observertogglecommand {
 			case "enable-observe":
 				// Enable the observerqueue
 				observertoggle = true
-
 				// Generate a server log
-				log := NewOrchServerlog("observer queue has been enabled")
-				// Stringify and print
-				fmt.Println(StringifyLog(log))
+				meshorchestrator.LogQueue <- NewOrchServerlog("observer queue enabled")
 
 			case "disable-observe":
 				// Disable the observerqueue
 				observertoggle = false
 				// Generate a server log
-				log := NewOrchServerlog("observer queue has been disabled")
-				// Stringify and print
-				fmt.Println(StringifyLog(log))
+				meshorchestrator.LogQueue <- NewOrchServerlog("observer queue disabled")
 			}
 		}
 	}

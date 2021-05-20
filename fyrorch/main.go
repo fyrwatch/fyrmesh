@@ -22,9 +22,8 @@ func main() {
 	// Construct a new MeshOrchestrator
 	meshorchestrator, err := tools.NewMeshOrchestrator()
 	if err != nil {
-		// Generate an ORCH serverlog and print it. (The logqueue was never built and hence cannot it be pushed into)
-		logmessage := tools.NewOrchServerlog(fmt.Sprintf("mesh orchestrator could not be constructed. error - %v", err))
-		fmt.Println(tools.StringifyLog(logmessage))
+		// Generate an ORCH serverlog and print it.
+		fmt.Println(tools.FormatLog(tools.NewOrchServerlog(fmt.Sprintf("(error) mesh orchestrator could not be constructed | error - %v |", err))))
 	}
 
 	// Defer the closing of the meshorchestrator channels
@@ -38,20 +37,15 @@ func main() {
 	defer conn.Close()
 	if err != nil {
 		// Generate an ORCH serverlog and send it over the LogQueue of the meshorchestrator
-		logmessage := tools.NewOrchServerlog(fmt.Sprintf("connection to LINK server could not be established. error - %v", err))
-		meshorchestrator.LogQueue <- logmessage
+		fmt.Println(tools.FormatLog(tools.NewOrchServerlog(fmt.Sprintf("(error) connection to LINK server could not be established | error - %v |", err))))
 	}
 
 	// Start the go routine that starts streaming logs from the LINK server
 	go orch.Call_LINK_Read(*client, meshorchestrator.LogQueue)
 
-	// TODO: Setup Firebase Cloud Listener
-	// TODO: Setup Task Generator and Scheduler
-
 	// Start the Orchestrator ORCH gRPC Server
 	if err = orch.Start_ORCH_Server(*client, meshorchestrator); err != nil {
 		// Generate an ORCH serverlog and send it over the LogQueue of the meshorchestrator
-		logmessage := tools.NewOrchServerlog(fmt.Sprintf("starting the ORCH server failed. error - %v", err))
-		meshorchestrator.LogQueue <- logmessage
+		fmt.Println(tools.FormatLog(tools.NewOrchServerlog(fmt.Sprintf("(error) starting the ORCH server failed | error - %v |", err))))
 	}
 }

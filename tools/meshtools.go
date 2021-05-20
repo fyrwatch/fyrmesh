@@ -168,13 +168,13 @@ type ControlNode struct {
 }
 
 // A constructor function that generates and returns a ControlNode.
-// Only accepts a Log of type 'controlconfig'.
+// Only accepts a Log of type 'ctrldata'.
 func NewControlNode(log Log) (*ControlNode, error) {
 	// Retrieve the type of the Log
 	logtype := log.GetLogtype()
-	// Check if the logtype is 'controlconfig'
-	if logtype != "controlconfig" {
-		return nil, fmt.Errorf("log is not of type 'controlconfig'")
+	// Check if the logtype is 'ctrldata'
+	if logtype != "ctrldata" {
+		return nil, fmt.Errorf("log is not of type 'ctrldata'")
 	}
 
 	// Retrieve the metadata of the log and deep deserialize the config
@@ -308,6 +308,9 @@ func (meshorchestrator *MeshOrchestrator) Close() {
 // that will trigger events that configure the Controlnode, the NodeList
 // and the NodeListID fields
 func (meshorchestrator *MeshOrchestrator) Initialize() {
+	// log the beginning of the pinghandler
+	fmt.Println(FormatLog(NewOrchServerlog("(startup) mesh orchestrator has started")))
+
 	// Send the command to read the control node config to the CommandQueue
 	command := map[string]string{"command": "readconfig-control"}
 	meshorchestrator.CommandQueue <- command
@@ -326,12 +329,12 @@ func (meshorchestrator *MeshOrchestrator) Flush() {
 	err := meshorchestrator.MeshDoc.Push(&meshorchestrator.Cloudinterface)
 	if err != nil {
 		// Log the meshdoc failing to be flushed to the cloud.
-		logmessage := NewOrchCloudlog(fmt.Sprintf("mesh document was unable to be flushed. pingID - %v", meshorchestrator.MeshDoc.ControllerID))
+		logmessage := NewOrchCloudlog(fmt.Sprintf("(failure) mesh document flush failed | doc - %v", meshorchestrator.MeshDoc.ControllerID))
 		meshorchestrator.LogQueue <- logmessage
 	}
 
 	// Log the meshdoc succesfully being flushed to the cloud.
-	logmessage := NewOrchCloudlog(fmt.Sprintf("mesh document was flushed. pingID - %v", meshorchestrator.MeshDoc.ControllerID))
+	logmessage := NewOrchCloudlog(fmt.Sprintf("(success) mesh document flush successful | doc - %v", meshorchestrator.MeshDoc.ControllerID))
 	meshorchestrator.LogQueue <- logmessage
 }
 
@@ -341,7 +344,7 @@ func (meshorchestrator *MeshOrchestrator) Flush() {
 func (meshorchestrator *MeshOrchestrator) SetNodeIDlist(log Log) error {
 	// Retrieve the type of the Log
 	logtype := log.GetLogtype()
-	// Check if the logtype is 'controlconfig'
+	// Check if the logtype is 'nodelist'
 	if logtype != "nodelist" {
 		return fmt.Errorf("log is not of type 'nodelist'")
 	}
@@ -367,20 +370,20 @@ func (meshorchestrator *MeshOrchestrator) SetNodeIDlist(log Log) error {
 	// Assign the new NodeIDlist
 	meshorchestrator.NodeIDlist = nodelist
 	// Call the method to update the NodeList based on the new NodeIDlist
-	meshorchestrator.UpdateNodelist()
+	go meshorchestrator.UpdateNodelist()
 	// Call the method to update the MeshDocument and flush it
-	meshorchestrator.Flush()
+	go meshorchestrator.Flush()
 	return nil
 }
 
 // A method of MeshOrchestrator that sets the value of the Controlnode field.
-// Accepts a log of type 'controlconfig' and constructs a ControlNode from the log.
+// Accepts a log of type 'ctrldata' and constructs a ControlNode from the log.
 func (meshorchestrator *MeshOrchestrator) SetControlnode(log Log) error {
 	// Retrieve the type of the Log
 	logtype := log.GetLogtype()
-	// Check if the logtype is 'controlconfig'
-	if logtype != "controlconfig" {
-		return fmt.Errorf("log is not of type 'controlconfig'")
+	// Check if the logtype is 'ctrldata'
+	if logtype != "ctrldata" {
+		return fmt.Errorf("log is not of type 'ctrldata'")
 	}
 
 	// Construct a new ControlNode
@@ -392,7 +395,7 @@ func (meshorchestrator *MeshOrchestrator) SetControlnode(log Log) error {
 	// Assign the controlnode to the meshorchestrator
 	meshorchestrator.Controlnode = *controlnode
 	// Call the method to update the MeshDocument and flush it
-	meshorchestrator.Flush()
+	go meshorchestrator.Flush()
 	return nil
 }
 
@@ -402,7 +405,7 @@ func (meshorchestrator *MeshOrchestrator) SetControlnode(log Log) error {
 func (meshorchestrator *MeshOrchestrator) SetNode(log Log) error {
 	// Retrieve the type of the Log
 	logtype := log.GetLogtype()
-	// Check if the logtype is 'controlconfig'
+	// Check if the logtype is 'configdata'
 	if logtype != "configdata" {
 		return fmt.Errorf("log is not of type 'configdata'")
 	}
@@ -416,7 +419,7 @@ func (meshorchestrator *MeshOrchestrator) SetNode(log Log) error {
 	// Assign the sensornode to the meshorchestrator's Nodelist
 	meshorchestrator.Nodelist[sensornode.NodeID] = *sensornode
 	// Call the method to update the MeshDocument and flush it
-	meshorchestrator.Flush()
+	go meshorchestrator.Flush()
 	return nil
 }
 
@@ -425,7 +428,7 @@ func (meshorchestrator *MeshOrchestrator) SetNode(log Log) error {
 func (meshorchestrator *MeshOrchestrator) SetSensorData(log Log) error {
 	// Retrieve the type of the Log
 	logtype := log.GetLogtype()
-	// Check if the logtype is 'controlconfig'
+	// Check if the logtype is 'sensordata'
 	if logtype != "sensordata" {
 		return fmt.Errorf("log is not of type 'sensordata'")
 	}

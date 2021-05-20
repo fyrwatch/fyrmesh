@@ -51,7 +51,7 @@ func (sensorping *SensorPing) CalculateFireProbability() error {
 func NewSensorPing(log Log, meshorchestrator *MeshOrchestrator) (*SensorPing, error) {
 	// Retrieve the type of the Log
 	logtype := log.GetLogtype()
-	// Check if the logtype is 'controlconfig'
+	// Check if the logtype is 'sensordata'
 	if logtype != "sensordata" {
 		return nil, fmt.Errorf("log is not of type 'sensordata'")
 	}
@@ -177,12 +177,12 @@ func (meshping *MeshPing) Flush(meshorchestrator *MeshOrchestrator) error {
 	err := pingdoc.Push(&meshorchestrator.Cloudinterface)
 	if err != nil {
 		// Log the meshping failing to be flushed to the cloud.
-		logmessage := NewOrchCloudlog(fmt.Sprintf("mesh ping was accumulated and unable to be flushed. pingID - %v", meshping.PingID))
+		logmessage := NewOrchCloudlog(fmt.Sprintf("(failure) mesh ping accumulated and flush failed | doc - %v", meshping.PingID))
 		meshorchestrator.LogQueue <- logmessage
 	}
 
 	// Log the meshping succesfully being flushed to the cloud.
-	logmessage := NewOrchCloudlog(fmt.Sprintf("mesh ping was accumulated and successfully flushed. pingID - %v", meshping.PingID))
+	logmessage := NewOrchCloudlog(fmt.Sprintf("(success) mesh ping accumulated and flush successful | doc - %v", meshping.PingID))
 	meshorchestrator.LogQueue <- logmessage
 
 	// Delete the meshping from the accumulation
@@ -207,6 +207,9 @@ func (meshping *MeshPing) AddPing(sensorping SensorPing, meshorchestrator *MeshO
 // Assigns the recieved to ping to the appropriate MeshPing in the orchestrator's accumulation or creates a new
 // Mesh and assigns it to that new MeshPing and adds the new MeshPing to orchestrator's accumulation.
 func PingHandler(meshorchestrator *MeshOrchestrator) {
+	// log the beginning of the pinghandler
+	meshorchestrator.LogQueue <- NewOrchServerlog("(startup) ping handler has started")
+
 	// Iterate over the AccumulatorQueue until it closes.
 	for sensorping := range meshorchestrator.AccumulatorQueue {
 

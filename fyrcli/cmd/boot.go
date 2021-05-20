@@ -82,7 +82,7 @@ NOTE: The LINK server should be booted up before the ORCH server to avoid an err
 
 func bootORCH() {
 	// Define the command to start the ORCH server in an lxterminal window.
-	cmd := exec.Command("lxterminal", "--geometry=200x30", "-t", "ORCH", "-e", "fyrorch")
+	cmd := exec.Command("lxterminal", "--geometry=250x30", "-t", "ORCH", "-e", "fyrorch")
 	// Run the command.
 	cmd.Run()
 }
@@ -93,7 +93,7 @@ func bootLINK(srcdir string) {
 	// Define the command to start the LINK server python script.
 	command := fmt.Sprintf("python3 %v", linkserver)
 	// Define the command to start the LINK server in an lxterminal window.
-	cmd := exec.Command("lxterminal", "--geometry=300x10", "-t", "LINK", "-e", command)
+	cmd := exec.Command("lxterminal", "--geometry=10x10", "-t", "LINK", "-e", command)
 	// Run the command.
 	cmd.Run()
 }
