@@ -182,3 +182,21 @@ func Call_ORCH_SchedulerToggle(client pb.OrchestratorClient, toggle bool) error 
 		return fmt.Errorf("call to ORCH Command returned a false acknowledge - %v", acknowledge.GetError())
 	}
 }
+
+// A function that calls the 'Simulate' method of the ORCH server over a gRPC connection.
+// Requires the ORCH client.
+func Call_ORCH_Simulate(client pb.OrchestratorClient) error {
+	// Call the SchedulerToggle method with the Trigger proto
+	acknowledge, err := client.Simulate(context.Background(), &pb.Trigger{Triggermessage: "start-fire-event"})
+
+	// Check for errors and return the appropriate acknowledgement and error if any.
+	if err != nil {
+		return fmt.Errorf("call to ORCH Command runtime failed - %v", err)
+	}
+
+	if success := acknowledge.GetSuccess(); success {
+		return nil
+	} else {
+		return fmt.Errorf("call to ORCH Command returned a false acknowledge - %v", acknowledge.GetError())
+	}
+}

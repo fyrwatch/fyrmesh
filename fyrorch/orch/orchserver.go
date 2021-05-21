@@ -210,7 +210,7 @@ func (server *OrchestratorServer) Nodelist(ctx context.Context, trigger *pb.Trig
 // A function that implements the 'SchedulerToggle' method of the Orchestrator service.
 // Accepts a Trigger and returns an Acknowledge.
 func (server *OrchestratorServer) SchedulerToggle(ctx context.Context, trigger *pb.Trigger) (*pb.Acknowledge, error) {
-	// Retrieve the trigger message from the Message object
+	// Retrieve the trigger message from the Trigger proto
 	triggermessage := trigger.GetTriggermessage()
 
 	// Check the value of the command message
@@ -231,6 +231,17 @@ func (server *OrchestratorServer) SchedulerToggle(ctx context.Context, trigger *
 		// Default to returning a fail Acknowledge because of an unsupported trigger message
 		return &pb.Acknowledge{Success: false, Error: "unsupported trigger"}, nil
 	}
+
+	// Return an success Acknowledge with no error
+	return &pb.Acknowledge{Success: true, Error: "nil"}, nil
+}
+
+func (server *OrchestratorServer) Simulate(ctx context.Context, trigger *pb.Trigger) (*pb.Acknowledge, error) {
+	// Activate the orchestrator's simulator
+	server.meshorchestrator.Simulator.SimulationOn = true
+
+	// Start the fire event
+	go server.meshorchestrator.Simulator.StartFireEvent(server.meshorchestrator.LogQueue)
 
 	// Return an success Acknowledge with no error
 	return &pb.Acknowledge{Success: true, Error: "nil"}, nil
