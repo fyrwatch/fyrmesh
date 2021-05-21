@@ -225,6 +225,9 @@ type MeshOrchestrator struct {
 	// A MeshDocument object that represents the mesh.
 	MeshDoc MeshDocument
 
+	// A Simulator object that exists in the background of the orchestrator.
+	Simulator FireEventSimulator
+
 	// A bool indicating if the scheduler is on or not.
 	SchedulerOn bool
 
@@ -272,6 +275,8 @@ func NewMeshOrchestrator() (*MeshOrchestrator, error) {
 	meshorchestrator.Controlnode = ControlNode{}
 	// Set the cloud interface object to the newly generated interface
 	meshorchestrator.Cloudinterface = *cloudinterface
+	// Set the simulator object to a fire event simulator
+	meshorchestrator.Simulator = *NewFireEventSimulator()
 
 	// Set the list of node IDs on the mesh to an emtpy slice of int
 	meshorchestrator.NodeIDlist = make([]int64, 0)

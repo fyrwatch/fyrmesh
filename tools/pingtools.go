@@ -13,8 +13,122 @@ package tools
 
 import (
 	"fmt"
+	"math"
 	"strconv"
 )
+
+// A function that maps a given input range of numbers to an output range.
+// Takes a value within the input range and returns the mapped output.
+//
+// Implementation logic based on https://stackoverflow.com/a/5732390
+func rangemapper(value, ipstart, ipend, opstart, opend float64) float64 {
+	// Checks if value is within input range
+	if value < ipstart || value > ipend {
+		return 0
+	}
+	// Calculates the mapping and returns it
+	output := opstart + ((opend-opstart)/(ipend-ipstart))*(value-ipstart)
+	return output
+}
+
+// A function that calculates the probability of a
+// fire based on the temperature reading around it.
+func calcTEMprobability(sensorvalue float64) float64 {
+	// Declare a float
+	var probability float64
+
+	// Check range of the temperature value and apply an appropriate mapping
+	if sensorvalue < 0 {
+		probability = 0
+
+	} else if sensorvalue >= 0 && sensorvalue <= 20 {
+		probability = rangemapper(sensorvalue, 0, 20, 1, 10)
+
+	} else if sensorvalue > 20 && sensorvalue <= 35 {
+		probability = rangemapper(sensorvalue, 20, 35, 10, 50)
+
+	} else if sensorvalue > 35 && sensorvalue <= 40 {
+		probability = rangemapper(sensorvalue, 35, 40, 50, 80)
+
+	} else if sensorvalue > 40 && sensorvalue <= 45 {
+		probability = rangemapper(sensorvalue, 40, 45, 80, 90)
+
+	} else if sensorvalue > 45 && sensorvalue <= 55 {
+		probability = rangemapper(sensorvalue, 45, 55, 90, 99)
+
+	} else {
+		probability = 100
+	}
+
+	// Return the probability
+	return probability
+}
+
+// A function that calculates the probability of a
+// fire based on the humidity reading around it.
+func calcHUMprobability(sensorvalue float64) float64 {
+	// Declare a float
+	var probability float64
+
+	// Check range of the humidity percentage value and apply an appropriate mapping
+	if sensorvalue > 90 {
+		probability = 0
+
+	} else if sensorvalue < 90 && sensorvalue >= 50 {
+		probability = rangemapper(sensorvalue, 90, 50, 1, 30)
+
+	} else if sensorvalue < 50 && sensorvalue >= 40 {
+		probability = rangemapper(sensorvalue, 50, 40, 30, 50)
+
+	} else if sensorvalue < 40 && sensorvalue >= 30 {
+		probability = rangemapper(sensorvalue, 40, 30, 50, 70)
+
+	} else if sensorvalue < 30 && sensorvalue >= 20 {
+		probability = rangemapper(sensorvalue, 30, 20, 70, 85)
+
+	} else if sensorvalue < 20 && sensorvalue >= 10 {
+		probability = rangemapper(sensorvalue, 20, 10, 85, 99)
+
+	} else {
+		probability = 100
+	}
+
+	// Return the probability
+	return probability
+}
+
+// A function that calculates the probability of a fire
+// based on the concentration of smoke reading around it.
+func calcGASprobability(sensorvalue float64) float64 {
+	// Declare a float
+	var probability float64
+
+	// Check range of the gas concentration value and apply an appropriate mapping
+	if sensorvalue < 250 {
+		probability = 0
+
+	} else if sensorvalue >= 250 && sensorvalue <= 450 {
+		probability = rangemapper(sensorvalue, 250, 450, 1, 15)
+
+	} else if sensorvalue > 450 && sensorvalue <= 650 {
+		probability = rangemapper(sensorvalue, 450, 650, 15, 40)
+
+	} else if sensorvalue > 650 && sensorvalue <= 800 {
+		probability = rangemapper(sensorvalue, 650, 800, 40, 70)
+
+	} else if sensorvalue > 800 && sensorvalue <= 900 {
+		probability = rangemapper(sensorvalue, 800, 900, 70, 90)
+
+	} else if sensorvalue > 900 && sensorvalue <= 1000 {
+		probability = rangemapper(sensorvalue, 900, 1000, 90, 99)
+
+	} else {
+		probability = 100
+	}
+
+	// Return the probability
+	return probability
+}
 
 // A struct that defines the ping response
 // of sensordata from a sensor node.
@@ -35,11 +149,70 @@ type SensorPing struct {
 	Fireprobability float64
 }
 
-// A function that calculates the probability of a fire in the
-// neighbourhood of the node and sets it to the SensorPing object
+// A function that calculates the probability of a fire in the neighbourhood
+// of the node and sets it to the SensorPing object's Fireprobability field.
 func (sensorping *SensorPing) CalculateFireProbability() error {
-	// TODO: implement
+	// Create a float and an empty slice of float64
+	var probability float64
+	probabilityvalues := make([]float64, 0)
+
+	// Iterate over the Sensordata map
+	for sensortype, sensorvalue := range sensorping.Sensordata {
+
+		// Check the type of sensor and call the function
+		// to calculate the probability from the sensor value
+		switch sensortype {
+		case "TEM":
+			probability = calcTEMprobability(sensorvalue)
+
+		case "HUM":
+			probability = calcHUMprobability(sensorvalue)
+
+		case "GAS":
+			probability = calcGASprobability(sensorvalue)
+
+		case "FLM":
+			if sensorvalue == 1 {
+				probability = 100
+			} else {
+				probability = 0
+			}
+		}
+
+		// Append the probability value for the given sensor into the slice
+		probabilityvalues = append(probabilityvalues, probability)
+	}
+
+	// Accumulate the probability values into its sum
+	total := 0.0
+	for _, prob := range probabilityvalues {
+		total = total + prob
+	}
+
+	// Calulate average of all sensor probabilities and round it the 2 decimals
+	probability = total / float64(len(probabilityvalues))
+	probability = math.Round(probability*100) / 100
+	// Assign the probability value to the Fireprobability field.
+	sensorping.Fireprobability = probability
 	return nil
+}
+
+// A method of SensorPing that generates the sensor data from the map parsed from the sensordata log.
+// Passes the sensor data through some regularity checks and through the simulator seed.
+// This allows the simulator to override the values if necessary.
+func (sensorping *SensorPing) GenerateSensorData(sensordata map[string]string, meshorchestrator *MeshOrchestrator) {
+	// Create an empty map of string -> float64
+	sensorping.Sensordata = make(map[string]float64)
+
+	// Parse and generate the sensor values that exist
+	sensorkeys := []string{"HUM", "TEM", "FLM", "GAS"}
+	for _, sensortype := range sensorkeys {
+		if sensorvalue, ok := sensordata[sensortype]; ok {
+			genvalue := GenerateSensorValue(sensorvalue, sensortype, meshorchestrator, true)
+			sensorping.Sensordata[sensortype] = genvalue
+		}
+	}
+
 }
 
 // A constructor function that generates and returns a SensorPing.
@@ -48,6 +221,7 @@ func (sensorping *SensorPing) CalculateFireProbability() error {
 // The value of the Sensornode is retrieved from MeshOrchestrator's Nodelist.
 // The value of the PingID is taken from sensordata log.
 // The value of the Pingtime is the current time when the struct is constructed.
+// The value of Fireprobabiliy is set by the CalculateFireProbability method.
 func NewSensorPing(log Log, meshorchestrator *MeshOrchestrator) (*SensorPing, error) {
 	// Retrieve the type of the Log
 	logtype := log.GetLogtype()
@@ -62,16 +236,8 @@ func NewSensorPing(log Log, meshorchestrator *MeshOrchestrator) (*SensorPing, er
 
 	// Create an empty SensorPing
 	sensorping := SensorPing{}
-	sensorping.Sensordata = make(map[string]float64)
-
-	// Parse and assign the sensor values that exist
-	sensorkeys := []string{"HUM", "TEM", "FLM", "GAS"}
-	for _, key := range sensorkeys {
-		if val, ok := sensordata[key]; ok {
-			parsedval, _ := strconv.ParseFloat(val, 64)
-			sensorping.Sensordata[key] = parsedval
-		}
-	}
+	// Generate the Sensordata by parsing the data recieved from the log
+	sensorping.GenerateSensorData(sensordata, meshorchestrator)
 
 	// Retrieve the node ID from the metadata
 	nodeid, _ := strconv.ParseInt(metadata["node"], 0, 64)
@@ -83,7 +249,7 @@ func NewSensorPing(log Log, meshorchestrator *MeshOrchestrator) (*SensorPing, er
 	sensorping.Pingtime = CurrentISOtime()
 
 	// Calculate the value of the fire probability
-	// sensorping.CalculateFireProbability()
+	sensorping.CalculateFireProbability()
 	// Return the sensor ping
 	return &sensorping, nil
 }
@@ -166,6 +332,32 @@ func (meshping *MeshPing) GenerateProbabilitydatamap() map[string]float64 {
 
 	// Return the probdata
 	return probdata
+}
+
+// A method of MeshPing that generates the average probability value of the meshping
+// by accumulating the probability values of individual nodes and taking their average.
+func (meshping *MeshPing) GenerateAvgProbability() float64 {
+	// Create an empty slice
+	probabilityvalues := make([]float64, 0)
+
+	// Iterate over the Pings of the meshping
+	for _, sensorping := range meshping.Pings {
+		// Convert the nodeIDs to strings and assign the Fireprobability value
+		probabilityvalues = append(probabilityvalues, sensorping.Fireprobability)
+	}
+
+	// Accumulate the probability values of each node
+	total := 0.0
+	for _, prob := range probabilityvalues {
+		total = total + prob
+	}
+
+	// Calculate the average and round to 2 decimals
+	avgprobability := total / float64(len(probabilityvalues))
+	avgprobability = math.Round(avgprobability*100) / 100
+
+	// Return the avgprobability
+	return avgprobability
 }
 
 // A method of MeshPing that flushes a completed MeshPing to the cloud.

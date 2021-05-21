@@ -93,7 +93,7 @@ func bootLINK(srcdir string) {
 	// Define the command to start the LINK server python script.
 	command := fmt.Sprintf("python3 %v", linkserver)
 	// Define the command to start the LINK server in an lxterminal window.
-	cmd := exec.Command("lxterminal", "--geometry=10x10", "-t", "LINK", "-e", command)
+	cmd := exec.Command("lxterminal", "--geometry=20x10", "-t", "LINK", "-e", command)
 	// Run the command.
 	cmd.Run()
 }

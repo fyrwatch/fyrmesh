@@ -163,9 +163,9 @@ func Call_ORCH_SchedulerToggle(client pb.OrchestratorClient, toggle bool) error 
 	// Check the toggle
 	switch toggle {
 	case true:
-		trigger = "scheduler-on"
+		trigger = "setscheduler-on"
 	case false:
-		trigger = "scheduler-off"
+		trigger = "setscheduler-off"
 	}
 
 	// Call the SchedulerToggle method with the Trigger proto

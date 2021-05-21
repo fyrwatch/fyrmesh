@@ -219,13 +219,13 @@ func (server *OrchestratorServer) SchedulerToggle(ctx context.Context, trigger *
 		// Set the schedulerOn value to True
 		server.meshorchestrator.SchedulerOn = true
 		// Log the start of the scheduled pinging to the LogQueue
-		server.meshorchestrator.LogQueue <- tools.NewOrchSchedlog(fmt.Sprintf("(start) scheduler has started"))
+		server.meshorchestrator.LogQueue <- tools.NewOrchSchedlog("(start) scheduler has started")
 
 	case "setscheduler-off":
 		// Set the schedulerOn value to True
 		server.meshorchestrator.SchedulerOn = false
 		// Log the stop of the scheduled pinging to the LogQueue
-		server.meshorchestrator.LogQueue <- tools.NewOrchSchedlog(fmt.Sprintf("(stop) scheduler has stopped"))
+		server.meshorchestrator.LogQueue <- tools.NewOrchSchedlog("(stop) scheduler has stopped")
 
 	default:
 		// Default to returning a fail Acknowledge because of an unsupported trigger message

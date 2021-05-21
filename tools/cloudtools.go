@@ -112,6 +112,7 @@ type PingDocument struct {
 	Nodelist        []int64                       `firestore:"nodelist"`
 	Sensordata      map[string]map[string]float64 `firestore:"sensordata"`
 	Probabilitydata map[string]float64            `firestore:"probability"`
+	AvgProbability  float64                       `firestore:"avgprobability"`
 }
 
 // A constructor function that generates and returns a PingDocument object from a given MeshPing.
@@ -123,9 +124,10 @@ func NewPingDocument(meshping *MeshPing) *PingDocument {
 	pingdoc.PingID = meshping.PingID
 	pingdoc.Pingtime = meshping.Pingtime
 	pingdoc.Nodelist = meshping.Nodelist
-	// Generate and assign the Sensordata and Probabilitydata
+	// Generate and assign the Sensordata, Probabilitydata and AvgProbability
 	pingdoc.Sensordata = meshping.GenerateSensordatamap()
 	pingdoc.Probabilitydata = meshping.GenerateProbabilitydatamap()
+	pingdoc.AvgProbability = meshping.GenerateAvgProbability()
 
 	// Return the PingDocument
 	return &pingdoc
