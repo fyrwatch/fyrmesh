@@ -2,9 +2,9 @@
 ![FyrMesh Banner](fyrmesh.png)
 ## A Go package for sensor mesh orchestration powered by gRPC & Protocol Buffers with a built-in FyrCLI. 
 
-**Version: 0.2.0**  
+**Version: 0.3.0**  
 **Platform: Raspbian OS & Windows**  
-**Language: Go 1.16 & Python 3.8**
+**Language: Go 1.16 & Python 3.9**
 **License: MIT**
 
 ### **Contributors**
@@ -73,7 +73,7 @@ For more information:
 - [Working with Protocol Buffers](https://grpc.io/docs/what-is-grpc/introduction/#working-with-protocol-buffers)
 
 ### **Installation**
-The FyrMesh library can be installed onto a Linux or a Windows system. Linux support is only intended for the Raspbian OS that is designed for the Raspberry Pi.  
+The FyrMesh library can be installed onto a Linux or a Windows system. Linux support is only intended for the Raspbian OS that is designed for the Raspberry Pi. 
 
 #### 1. Prerequisites
 Install Go 1.16 and Python 3.8
@@ -94,11 +94,13 @@ Download this repository to some location on your system with one of the followi
   go get -u github.com/fyrwatch/fyrmesh
   ```
 
+At this stage, the project is only an application and not a fully managed service, so the set up of the cloud interface is upto the user. This involves having a **Google Cloud Platform** Project with billing enabled and a Firestore database created. An IAM Service Account with the role *Datastore User* must be created and JSON key for it must be generated. This key must exist in the ``FYRMESHCONFIG`` directory with the name *cloudconfig.json*
+
 #### 2. Install FyrMesh
 - Navigate into the ``/fyrmesh`` directory of the repository after downloading it.
 - Open a terminal window in this directory and run the following command
 ```
-python3 install.py
+python install.py
 ```
 - The FyrMesh components will now be installed.
 
@@ -115,11 +117,11 @@ The steps to add environment variables are detailed below for each platform.
   ``` 
 - Add the following lines to ``fyrmesh.sh`` file.
   ```
-  export FYRMESHCONFIG=<<path to the config file>>
-  export FYRMESHSRC=<<path to the repository source files directory>>
-  export PATH=$PATH:<<path to Go bin install directory>>
+  export FYRMESHCONFIG=<path to the config file directory>
+  export FYRMESHSRC=<path to the repository source files directory>
+  export PATH=$PATH:<path to Go bin install directory>
   ``` 
-  The recommended value for ``FYRMESHCONFIG`` is ``/home/pi/.fyrmesh/config.json``  
+  The recommended value for ``FYRMESHCONFIG`` is ``/home/pi/.fyrmesh``  
   The recommended value for go bin path extension is ``/home/pi/go/bin``
 - Reboot the system to apply changes.
 
@@ -127,7 +129,7 @@ The steps to add environment variables are detailed below for each platform.
 - Press the Start Menu and type *'env*'. 
 - An option *'Edit the environment variables for your account'* will appear. Select it.
 - A list of environment variables will be visible. Select the *'New'* option.
-- Fill in the value for ``FYRMESHCONFIG``. The recommended value is ``C:\Users\<user>\.fyrmesh\config.json``.
+- Fill in the value for ``FYRMESHCONFIG``. The recommended value is ``C:\Users\<user>\.fyrmesh``.
 - Repeat and fill in the value for ``FYRMESHSRC`` with the path to the install directory.
 - PATH extension wouldn't be required because the Go installer for windows handles it.
 - Reboot the systems to apply changes.
@@ -143,22 +145,26 @@ The output will be something along the lines of the following.
 A CLI Application to interact with the FyrMesh API. Powered by Cobra CLI, Golang and gRPC.
 
 Usage:
-  FyrCLI [command]
+  fyrcli [command]
 
 Available Commands:
   boot        Boots a FyrMesh gRPC server.
-  config      View/Manipulate configuration values of the FyrCLI.
+  command     Sends a control command to the mesh.
+  config      View configuration values of the FyrCLI.
   connect     Set the connection state of the control node.
   help        Help about any command
-  observe     Observes the logstream of the ORCH server.
-  ping        Pings the mesh for sensor readings.
+  nodelist    Displays the list of nodes connected to the mesh.
+  observe     Observes the logstream from the ORCH server.
+  ping        Pings the mesh or a node.
+  scheduler   Sets the state of the Scheduler
+  simulate    Starts a simulation of a Fire Event
   status      Displays the current status of the mesh.
 
 Flags:
       --config string   config file (default is $HOME/.cli.yaml)
-  -h, --help            help for FyrCLI
+  -h, --help            help for fyrcli
 
-Use "FyrCLI [command] --help" for more information about a command.
+Use "fyrcli [command] --help" for more information about a command.
 ```
 
 You can also run ``fyrcli help <command>`` or ``fyrcli <command> --help`` to recieve the
