@@ -5,6 +5,7 @@
 **Version: 0.2.0**  
 **Platform: Raspbian OS & Windows**  
 **Language: Go 1.16 & Python 3.8**
+**License: MIT**
 
 ### **Contributors**
 - **Manish Meganathan**
